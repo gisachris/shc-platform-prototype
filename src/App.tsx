@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header, NavTab } from './components/Header';
 import { LandingPageView } from './components/LandingPageView';
 import { UserDashboardView } from './components/UserDashboardView';
@@ -19,19 +19,28 @@ import { api } from './services/api';
 
 const ORGANIZER_ROLES = ['organizer', 'administrator', 'super_admin'];
 
+const APP_TABS_WITH_CONFERENCE_CONTEXT: NavTab[] = [
+  'schedule',
+  'speakers',
+  'registration',
+  'cfp',
+  'admin',
+];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('landing');
-  const [currentConferenceId, setCurrentConferenceId] = useState<string>('conf-kigali-2026');
+  const [currentConferenceId, setCurrentConferenceId] = useState<string>('');
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'reset'>('login');
+  const [resetTokenFromUrl, setResetTokenFromUrl] = useState<string | null>(null);
 
   const [sessions, setSessions] = useState<Session[]>([]);
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [conferences, setConferences] = useState<Conference[]>([]);
-  const [stats, setStats] = useState<{
+  const [platformStats, setPlatformStats] = useState<{
     totalAttendees: number;
     checkedInCount: number;
     totalSessions: number;
@@ -61,10 +70,26 @@ export default function App() {
   const [isLiveSimulated, setIsLiveSimulated] = useState(true);
   const [simulatedTimeMinutes, setSimulatedTimeMinutes] = useState(getRealCurrentMinutes);
 
+  const activeConference = useMemo(
+    () => conferences.find((c) => c.id === currentConferenceId) || null,
+    [conferences, currentConferenceId]
+  );
+
+  const showConferenceContext =
+    Boolean(activeConference) && APP_TABS_WITH_CONFERENCE_CONTEXT.includes(activeTab);
+
   useEffect(() => {
     api.getCurrentUser().then((user) => {
       if (user) setCurrentUser(user);
     }).catch(console.error);
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('resetToken');
+    if (token) {
+      setResetTokenFromUrl(token);
+      setAuthModalMode('reset');
+      setIsAuthModalOpen(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -77,24 +102,46 @@ export default function App() {
 
   const refreshAllData = async () => {
     try {
-      const [sData, spkData, confData, statsData] = await Promise.all([
-        api.getSessions({ conferenceId: currentConferenceId }),
+      const [spkData, confData, platformStatsData] = await Promise.all([
         api.getSpeakers(),
         api.getConferences(),
-        api.getStats(currentConferenceId),
+        api.getStats(),
       ]);
-      setSessions(sData);
+
       setSpeakers(spkData);
       setConferences(confData);
-      setStats(statsData);
+      setPlatformStats(platformStatsData);
 
-      if (currentUser && ORGANIZER_ROLES.includes(currentUser.role)) {
-        try {
-          const attData = await api.getAttendees(currentConferenceId);
-          setAttendees(attData);
-        } catch {
+      const resolvedId =
+        (currentConferenceId && confData.some((c: Conference) => c.id === currentConferenceId)
+          ? currentConferenceId
+          : confData[0]?.id) || '';
+
+      // Resolve default conference from API once — avoids hardcoded IDs on first paint
+      if (resolvedId !== currentConferenceId) {
+        setCurrentConferenceId(resolvedId);
+        return;
+      }
+
+      if (resolvedId) {
+        const [sData] = await Promise.all([
+          api.getSessions({ conferenceId: resolvedId }),
+        ]);
+        setSessions(sData);
+
+        if (currentUser && ORGANIZER_ROLES.includes(currentUser.role)) {
+          try {
+            const attData = await api.getAttendees(resolvedId);
+            setAttendees(attData);
+          } catch {
+            setAttendees([]);
+          }
+        } else {
           setAttendees([]);
         }
+      } else {
+        setSessions([]);
+        setAttendees([]);
       }
     } catch (err) {
       console.error('Failed to load conference data:', err);
@@ -105,6 +152,7 @@ export default function App() {
 
   useEffect(() => {
     refreshAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConferenceId, currentUser?.id]);
 
   useEffect(() => {
@@ -150,6 +198,8 @@ export default function App() {
     refreshAllData();
   };
 
+  const isPublicLanding = activeTab === 'landing' && !currentUser;
+
   return (
     <div className="min-h-screen bg-gray-50 text-slate-800 font-sans selection:bg-slate-900 selection:text-white flex flex-col">
       <Header
@@ -161,9 +211,16 @@ export default function App() {
         currentUser={currentUser}
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
+        activeConferenceLabel={showConferenceContext ? activeConference?.title : null}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <main
+        className={
+          isPublicLanding
+            ? 'flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 max-w-7xl'
+            : 'flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6'
+        }
+      >
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center">
             <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
@@ -188,9 +245,10 @@ export default function App() {
                 <LandingPageView
                   onOpenAuth={handleOpenAuth}
                   onNavigateTab={handleTabChange}
-                  stats={stats}
+                  onSelectConference={setCurrentConferenceId}
+                  stats={platformStats}
                   conferences={conferences}
-                  currentUser={currentUser}
+                  speakers={speakers}
                 />
               ))}
 
@@ -217,7 +275,10 @@ export default function App() {
               <ConferencesView
                 currentUser={currentUser}
                 currentConferenceId={currentConferenceId}
-                onSelectConference={(conf) => setCurrentConferenceId(conf.id)}
+                onSelectConference={(conf) => {
+                  setCurrentConferenceId(conf.id);
+                  if (currentUser) handleTabChange('schedule');
+                }}
               />
             )}
 
@@ -263,8 +324,15 @@ export default function App() {
 
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setResetTokenFromUrl(null);
+          if (window.location.search.includes('resetToken=')) {
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        }}
         initialMode={authModalMode}
+        initialResetToken={resetTokenFromUrl}
         onSuccessLogin={(user) => {
           setCurrentUser(user);
           if (ORGANIZER_ROLES.includes(user.role)) {
@@ -306,19 +374,28 @@ export default function App() {
         conferenceId={currentConferenceId}
       />
 
-      <footer className="bg-white border-t border-gray-200 py-8 text-xs text-slate-500 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
+      {!isPublicLanding && (
+        <footer className="bg-white border-t border-gray-200 py-8 text-xs text-slate-500 mt-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <span className="font-bold text-slate-900">SHC Platform</span>
+              {' '}• Smart Hybrid Conference Management
+            </div>
+            <div className="flex items-center gap-4 text-slate-500">
+              <span>Hybrid sessions powered by LiveKit</span>
+            </div>
+          </div>
+        </footer>
+      )}
+
+      {isPublicLanding && (
+        <footer className="bg-white border-t border-gray-200 py-6 text-xs text-slate-500 mt-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span className="font-bold text-slate-900">SHC Platform</span>
             {' '}• Smart Hybrid Conference Management
           </div>
-          <div className="flex items-center gap-4 text-slate-500">
-            <span>Kigali, Rwanda</span>
-            <span>•</span>
-            <span>Hybrid sessions powered by LiveKit</span>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

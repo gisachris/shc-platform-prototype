@@ -45,6 +45,8 @@ interface HeaderProps {
   currentUser: User | null;
   onOpenAuth: (mode?: 'login' | 'register') => void;
   onLogout: () => void;
+  /** When set (app views only), shows live conference context — never a hardcoded venue. */
+  activeConferenceLabel?: string | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -56,7 +58,9 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onOpenAuth,
   onLogout,
+  activeConferenceLabel,
 }) => {
+  const isPublicLanding = activeTab === 'landing' && !currentUser;
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false);
@@ -122,38 +126,42 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200 text-slate-800 shadow-xs">
-      {/* Top Banner Status Bar */}
-      <div className="bg-slate-950 text-white text-xs py-1.5 px-4 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
-          <div className="flex items-center gap-2 font-medium">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span>SHC Platform • Kigali Convention Centre</span>
-          </div>
-
-          {currentUser && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsLiveSimulated(!isLiveSimulated)}
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold transition ${
-                  isLiveSimulated
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
-                }`}
-              >
-                <Radio className={`w-3 h-3 ${isLiveSimulated ? 'animate-pulse text-emerald-400' : ''}`} />
-                <span>{isLiveSimulated ? 'Schedule clock on' : 'Schedule clock paused'}</span>
-              </button>
+      {/* App status strip — hidden on public marketing landing to avoid duplicate chrome */}
+      {!isPublicLanding && (
+        <div className="bg-slate-950 text-white text-xs py-1.5 px-4 border-b border-slate-800">
+          <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div className="flex items-center gap-2 font-medium min-w-0">
+              <span className="flex h-2 w-2 relative shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="truncate">
+                {activeConferenceLabel
+                  ? `Viewing · ${activeConferenceLabel}`
+                  : 'SHC Platform'}
+              </span>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Main Navigation Header */}
+            {currentUser && activeTab === 'schedule' && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsLiveSimulated(!isLiveSimulated)}
+                  className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold transition ${
+                    isLiveSimulated
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
+                  }`}
+                >
+                  <Radio className={`w-3 h-3 ${isLiveSimulated ? 'animate-pulse text-emerald-400' : ''}`} />
+                  <span>{isLiveSimulated ? 'Schedule clock on' : 'Schedule clock paused'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
-        {/* Brand Logo & Name */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('landing')}>
           <div className="w-10 h-10 rounded-xl bg-slate-900 text-white shadow-sm flex items-center justify-center">
             <Building2 className="w-5 h-5 text-amber-400" />
@@ -163,19 +171,15 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="text-xl font-black tracking-tight text-slate-900">
                 SHC <span className="text-blue-600">Platform</span>
               </h1>
-              <span className="text-[10px] uppercase tracking-wider font-extrabold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
-                Hybrid Summit Hub
-              </span>
             </div>
-            <p className="text-xs text-slate-500">Smart Hybrid Conference Management System</p>
+            <p className="text-xs text-slate-500">Smart Hybrid Conference Management</p>
           </div>
         </div>
 
-        {/* Dynamic Role-Based Navigation Links */}
         <div className="flex items-center gap-2">
           <nav className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
-            {/* Public browsing tabs (available before sign-in) */}
-            {!currentUser && (
+            {/* Guest public links — not on marketing landing (CTAs live in the page) */}
+            {!currentUser && !isPublicLanding && (
               <>
                 <button
                   onClick={() => setActiveTab('conferences')}

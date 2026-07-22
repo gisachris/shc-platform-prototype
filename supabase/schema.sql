@@ -210,3 +210,7 @@ create index if not exists idx_attendees_conference on attendees(conference_id);
 create index if not exists idx_sessions_conference on sessions(conference_id);
 create index if not exists idx_qa_session on qa_questions(session_id);
 create index if not exists idx_messages_receiver on direct_messages(receiver_id);
+
+-- Password reset (safe to re-run on existing projects)
+alter table users add column if not exists reset_token_hash text;
+alter table users add column if not exists reset_token_expires timestamptz;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { api } from '../services/api';
-import { emailService } from '../services/emailService';
 import { X, LogIn, UserPlus, Key, AlertCircle, Mail } from 'lucide-react';
 
 interface AuthModalProps {
@@ -9,6 +8,8 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccessLogin: (user: User) => void;
   initialMode?: 'login' | 'register' | 'reset';
+  /** When opened from an email reset link (?resetToken=…) */
+  initialResetToken?: string | null;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -16,9 +17,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccessLogin,
   initialMode = 'login',
+  initialResetToken = null,
 }) => {
   const [activeTab, setActiveTab] = useState<'login' | 'register' | 'reset'>(
-    initialMode === 'reset' ? 'reset' : initialMode
+    initialMode === 'reset' || initialResetToken ? 'reset' : initialMode
   );
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -28,18 +30,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [regCompany, setRegCompany] = useState('');
   const [regJobTitle, setRegJobTitle] = useState('');
   const [resetEmail, setResetEmail] = useState('');
-  const [resetSentSuccess, setResetSentSuccess] = useState<string | null>(null);
+  const [resetToken, setResetToken] = useState(initialResetToken || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [resetPhase, setResetPhase] = useState<'request' | 'set-password'>(
+    initialResetToken ? 'set-password' : 'request'
+  );
+  const [resetInfo, setResetInfo] = useState<string | null>(null);
+  const [resetLinkFallback, setResetLinkFallback] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setActiveTab(initialMode === 'reset' ? 'reset' : initialMode);
-      setErrorMsg(null);
-      setInfoMsg(null);
+    if (!isOpen) return;
+    setActiveTab(initialResetToken || initialMode === 'reset' ? 'reset' : initialMode);
+    setErrorMsg(null);
+    setInfoMsg(null);
+    setResetInfo(null);
+    setResetLinkFallback(null);
+    if (initialResetToken) {
+      setResetToken(initialResetToken);
+      setResetPhase('set-password');
+    } else {
+      setResetPhase('request');
     }
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode, initialResetToken]);
 
   if (!isOpen) return null;
 
@@ -63,23 +78,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
     setSubmitting(true);
     try {
-      const user = await api.register({
+      const result = await api.register({
         fullName: regName,
         email: regEmail,
         password: regPassword,
         company: regCompany,
         jobTitle: regJobTitle,
       });
-      try {
-        await emailService.sendAccountConfirmation({
-          to_name: regName,
-          to_email: regEmail,
-          role: 'attendee',
-        });
-      } catch {
-        /* optional */
+      if (result.welcomeEmailMessage) {
+        setInfoMsg(result.welcomeEmailMessage);
       }
-      onSuccessLogin(user);
+      onSuccessLogin(result.user);
       onClose();
     } catch (err: any) {
       setErrorMsg(err.message || 'Registration failed.');
@@ -88,18 +97,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handlePasswordResetSubmit = async (e: React.FormEvent) => {
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setResetInfo(null);
+    setResetLinkFallback(null);
+    setSubmitting(true);
+    try {
+      const result = await api.forgotPassword(resetEmail);
+      setResetInfo(result.message);
+      if (result.resetLink) {
+        setResetLinkFallback(result.resetLink);
+        const token = new URL(result.resetLink, window.location.origin).searchParams.get('resetToken');
+        if (token) setResetToken(token);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Unable to start password reset.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSetNewPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setSubmitting(true);
     try {
-      const result = await emailService.sendPasswordReset({
-        to_name: resetEmail.split('@')[0],
-        to_email: resetEmail,
-      });
-      setResetSentSuccess(result.message);
+      const result = await api.resetPassword(resetToken.trim(), newPassword);
+      setInfoMsg(result.message);
+      setActiveTab('login');
+      setResetPhase('request');
+      setNewPassword('');
+      // Clear token from address bar if present
+      if (window.location.search.includes('resetToken=')) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Unable to send reset email.');
+      setErrorMsg(err.message || 'Unable to reset password.');
     } finally {
       setSubmitting(false);
     }
@@ -174,7 +208,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
               <button
                 type="button"
-                onClick={() => setActiveTab('reset')}
+                onClick={() => {
+                  setActiveTab('reset');
+                  setResetPhase('request');
+                }}
                 className="text-[11px] font-semibold text-slate-500 hover:text-slate-900"
               >
                 Forgot password?
@@ -217,21 +254,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs"
               />
               <div className="grid grid-cols-2 gap-2">
-                <input
-                  value={regCompany}
-                  onChange={(e) => setRegCompany(e.target.value)}
-                  placeholder="Organization"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs"
-                />
-                <input
-                  value={regJobTitle}
-                  onChange={(e) => setRegJobTitle(e.target.value)}
-                  placeholder="Job title"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs"
-                />
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">
+                    Organization <span className="font-medium normal-case text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    value={regCompany}
+                    onChange={(e) => setRegCompany(e.target.value)}
+                    placeholder="e.g. Kigali Innovation Hub"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">
+                    Job title <span className="font-medium normal-case text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    value={regJobTitle}
+                    onChange={(e) => setRegJobTitle(e.target.value)}
+                    placeholder="e.g. Software Engineer"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs"
+                  />
+                </div>
               </div>
-              <p className="text-[10px] text-slate-500">
-                New accounts are created as attendees. Organizer access is provisioned by administrators.
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                Organization and job title are profile fields for networking — not platform access roles.
+                Every self-signup account is created as an <strong>attendee</strong>. Organizer or speaker
+                access is assigned by an administrator.
               </p>
               <button
                 type="submit"
@@ -245,14 +294,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {activeTab === 'reset' && (
-            <form onSubmit={handlePasswordResetSubmit} className="space-y-4">
-              {resetSentSuccess ? (
-                <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex gap-2">
-                  <Mail className="w-4 h-4 shrink-0" />
-                  {resetSentSuccess}
-                </div>
-              ) : (
-                <>
+            <div className="space-y-4">
+              {resetPhase === 'request' ? (
+                <form onSubmit={handleForgotSubmit} className="space-y-4">
+                  {resetInfo && (
+                    <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex gap-2">
+                      <Mail className="w-4 h-4 shrink-0" />
+                      <div className="space-y-2">
+                        <p>{resetInfo}</p>
+                        {resetLinkFallback && (
+                          <p className="text-[11px] text-slate-600">
+                            Temporary reset link (email not delivered):{' '}
+                            <button
+                              type="button"
+                              className="text-blue-700 font-semibold underline"
+                              onClick={() => {
+                                setResetPhase('set-password');
+                              }}
+                            >
+                              Continue to set a new password
+                            </button>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <input
                     type="email"
                     required
@@ -264,12 +330,44 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl py-3 text-xs font-bold"
+                    className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl py-3 text-xs font-bold disabled:opacity-60"
                   >
                     <Key className="w-4 h-4" />
-                    Send Reset Link
+                    {submitting ? 'Sending…' : 'Send reset instructions'}
                   </button>
-                </>
+                  {resetLinkFallback && (
+                    <button
+                      type="button"
+                      onClick={() => setResetPhase('set-password')}
+                      className="w-full text-[11px] font-semibold text-blue-700"
+                    >
+                      I have a reset token — set new password
+                    </button>
+                  )}
+                </form>
+              ) : (
+                <form onSubmit={handleSetNewPassword} className="space-y-4">
+                  <p className="text-[11px] text-slate-500">
+                    Enter a new password for your account. The reset link expires after one hour.
+                  </p>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="New password (min 6 characters)"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs"
+                  />
+                  <button
+                    type="submit"
+                    disabled={submitting || !resetToken}
+                    className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl py-3 text-xs font-bold disabled:opacity-60"
+                  >
+                    <Key className="w-4 h-4" />
+                    {submitting ? 'Updating…' : 'Update password'}
+                  </button>
+                </form>
               )}
               <button
                 type="button"
@@ -278,7 +376,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               >
                 Back to sign in
               </button>
-            </form>
+            </div>
           )}
         </div>
       </div>

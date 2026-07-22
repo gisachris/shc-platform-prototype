@@ -31,7 +31,21 @@ Copy `.env.example` → `.env` and set:
 | `GEMINI_API_KEY` | Optional | Enables CFP AI review |
 | `GEMINI_MODEL` | Optional | Default `gemini-2.0-flash` |
 | `PORT` | Optional | Default `3000` |
-| `APP_URL` | Recommended | Public URL |
+| `APP_URL` | Recommended | Public URL (used in password-reset links) |
+| `EMAILJS_*` / `VITE_EMAILJS_*` | Optional | Welcome + password-reset emails via EmailJS |
+
+After the initial schema, also run the password-reset columns if upgrading an existing DB:
+
+```sql
+alter table users add column if not exists reset_token_hash text;
+alter table users add column if not exists reset_token_expires timestamptz;
+```
+
+## Email behaviour
+
+- **Signup**: account is always created in Supabase. A welcome email is sent only when EmailJS welcome template vars are set.
+- **Password reset**: `/api/auth/forgot-password` creates a one-hour token. If EmailJS reset template works, the user gets a link (`APP_URL/?resetToken=…`). If email cannot be sent, the API returns a temporary reset link for pilot/demo use.
+- **Contact form** on the landing page uses `mailto:` (opens the visitor’s email client). It is not EmailJS and does not store messages in the database.
 
 ## 3. Seed data
 

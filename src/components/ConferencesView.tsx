@@ -142,10 +142,10 @@ export const ConferencesView: React.FC<ConferencesViewProps> = ({
                     </span>
                   </div>
 
-                  {isSelected && (
+                  {isSelected && currentUser && (
                     <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[11px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Selected</span>
+                      <span>Active</span>
                     </div>
                   )}
 
@@ -185,13 +185,19 @@ export const ConferencesView: React.FC<ConferencesViewProps> = ({
                     <button
                       onClick={() => onSelectConference(conf)}
                       className={`flex-1 font-bold py-2.5 px-4 rounded-2xl text-xs flex items-center justify-center gap-1.5 transition ${
-                        isSelected
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
+                        isSelected && currentUser
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                           : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
                       }`}
                     >
-                      <span>{isSelected ? 'Current Selected' : 'Select conference'}</span>
-                      {!isSelected && <ChevronRight className="w-3.5 h-3.5" />}
+                      <span>
+                        {currentUser
+                          ? isSelected
+                            ? 'Active for schedule'
+                            : 'Open schedule'
+                          : 'View conference'}
+                      </span>
+                      {!(isSelected && currentUser) && <ChevronRight className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>

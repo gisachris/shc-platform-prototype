@@ -52,9 +52,44 @@ export const api = {
       body: JSON.stringify(data),
     });
     if (!res.ok) await parseError(res, 'Registration failed');
-    const result = (await res.json()) as { success: boolean; user: User };
+    const result = (await res.json()) as {
+      success: boolean;
+      user: User;
+      welcomeEmailSent?: boolean;
+      welcomeEmailMessage?: string;
+    };
     if (result.user.token) localStorage.setItem(AUTH_TOKEN_KEY, result.user.token);
-    return result.user;
+    return result;
+  },
+
+  async forgotPassword(email: string) {
+    const res = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) await parseError(res, 'Password reset request failed');
+    return res.json() as Promise<{
+      success: boolean;
+      message: string;
+      emailConfigured?: boolean;
+      emailSent?: boolean;
+      resetLink?: string;
+    }>;
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword }),
+    });
+    if (!res.ok) await parseError(res, 'Password reset failed');
+    return res.json() as Promise<{ success: boolean; message: string }>;
+  },
+
+  logout() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
   },
 
   async getCurrentUser() {
@@ -70,10 +105,6 @@ export const api = {
     } catch {
       return null;
     }
-  },
-
-  logout() {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
   },
 
   async getStats(conferenceId?: string) {

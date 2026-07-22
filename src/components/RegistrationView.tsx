@@ -98,11 +98,13 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
   useEffect(() => {
     api.getConferences().then(data => {
       setConferences(data);
-      if (data.length > 0) {
-        setSelectedConferenceId(data[0].id);
-      }
+      const preferred =
+        (conferenceId && data.some(c => c.id === conferenceId) && conferenceId) ||
+        data[0]?.id ||
+        '';
+      setSelectedConferenceId(preferred);
     }).catch(console.error);
-  }, []);
+  }, [conferenceId]);
 
   const availableInterests = [
     'AI & Machine Learning',
