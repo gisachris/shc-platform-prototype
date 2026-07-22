@@ -388,7 +388,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
   const [userName, setUserName] = useState<string>(defaultUserName || 'Conference Participant');
   const [isSpeaker, setIsSpeaker] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
-  const [wsUrl, setWsUrl] = useState<string>('wss://demo.livekit.cloud');
+  const [wsUrl, setWsUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -585,8 +585,8 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
       if (res.wsUrl) setWsUrl(res.wsUrl);
       setIsConnected(true);
     } catch (err: any) {
-      console.error('Failed to connect to LiveKit WebRTC:', err);
-      setError(err.message || 'Could not fetch LiveKit WebRTC access token.');
+      console.error('Failed to connect to LiveKit:', err);
+      setError(err.message || 'Could not start the live session. Sign in and try again.');
     } finally {
       setLoading(false);
     }
@@ -614,7 +614,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    LiveKit WebRTC Low-Latency
+                    Live session
                   </span>
                   <span className="text-xs text-slate-400 font-mono hidden sm:inline">Room: {roomName}</span>
                 </div>
@@ -629,7 +629,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
                 type="button"
                 onClick={() => window.open(window.location.href, '_blank')}
                 className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
-                title="Open app in a new tab for unconstrained WebRTC screen sharing"
+                title="Open app in a new tab for full screen sharing"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-blue-200" />
                 <span className="hidden sm:inline">Open in New Tab</span>
@@ -658,7 +658,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
                   <div>
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
                       <Tv className="w-5 h-5 text-blue-400" />
-                      <span>WebRTC Audio & Video Setup</span>
+                      <span>Camera & microphone setup</span>
                     </h3>
                     <p className="text-xs text-slate-400">
                       Configure your hardware, select devices, and test screen share before entering the session.
@@ -892,18 +892,18 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs shadow-xl shadow-blue-600/25 transition flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <span className="animate-spin">↻ Connecting WebRTC Room...</span>
+                    <span className="animate-spin">↻ Connecting…</span>
                   ) : (
                     <>
                       <Video className="w-4.5 h-4.5" />
-                      <span>Join LiveKit WebRTC Session Now</span>
+                      <span>Join session</span>
                     </>
                   )}
                 </button>
 
                 <div className="text-center text-[10px] text-slate-500 flex items-center justify-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Real-Time WebRTC Audio, Video & Screen Share Enabled</span>
+                  <span>Audio, video, and screen share available</span>
                 </div>
               </div>
             </div>
@@ -941,7 +941,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
                 </LiveKitRoom>
               ) : (
                 <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
-                  <span>Initializing WebRTC Stream...</span>
+                  <span>Connecting to live room…</span>
                 </div>
               )}
             </div>
@@ -960,7 +960,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
 
           <div className="flex items-center gap-2 text-emerald-400 font-semibold">
             <Activity className="w-3.5 h-3.5" />
-            <span>LiveKit WebRTC Active</span>
+            <span>Live session active</span>
           </div>
         </div>
 

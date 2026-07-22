@@ -119,7 +119,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="mb-6">
             <h2 className="text-xl font-black text-slate-900 tracking-tight">SHC Platform Access</h2>
             <p className="text-xs text-slate-500 mt-1">
-              Sign in to manage your hybrid conference experience with Rwanda Convention Bureau case study events.
+              Sign in to access your schedule, live sessions, networking, and organizer tools.
             </p>
           </div>
 

@@ -12,11 +12,8 @@ import {
   Calendar, 
   Bookmark, 
   BookmarkCheck, 
-  Send, 
   X, 
-  MessageSquare,
-  Sparkles,
-  ExternalLink
+  MessageSquare
 } from 'lucide-react';
 
 interface SpeakersViewProps {
@@ -40,8 +37,6 @@ export const SpeakersView: React.FC<SpeakersViewProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('All');
-  const [amaMessage, setAmaMessage] = useState('');
-  const [amaSentSuccess, setAmaSentSuccess] = useState(false);
 
   // Extract all topics
   const allTopics = useMemo(() => {
@@ -83,27 +78,19 @@ export const SpeakersView: React.FC<SpeakersViewProps> = ({
     return sessions.filter(s => s.speakerIds.includes(activeSpeaker.id));
   }, [sessions, activeSpeaker]);
 
-  const handleSendAMAMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!amaMessage.trim()) return;
-    setAmaSentSuccess(true);
-    setAmaMessage('');
-    setTimeout(() => setAmaSentSuccess(false), 4000);
-  };
-
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
         <div className="max-w-3xl space-y-2 relative z-10">
           <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-slate-700 border border-gray-200">
-            World-Class Keynotes & Industry Leaders
+            Speakers
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Interactive Speaker Profiles
+            Speaker directory
           </h2>
           <p className="text-sm text-slate-500">
-            Connect with technical pioneers, explore their sessions, and submit direct Q&A questions.
+            Browse profiles and open sessions to ask questions during live Q&A.
           </p>
         </div>
       </div>
@@ -202,7 +189,7 @@ export const SpeakersView: React.FC<SpeakersViewProps> = ({
                   {speakerSessionsCount} Session{speakerSessionsCount !== 1 ? 's' : ''} Hosted
                 </span>
                 <span className="text-blue-600 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">
-                  View Profile & Ask AMA →
+                  View profile →
                 </span>
               </div>
             </div>
@@ -342,37 +329,15 @@ export const SpeakersView: React.FC<SpeakersViewProps> = ({
                 </div>
               </div>
 
-              {/* Direct AMA Box */}
-              <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 space-y-3">
+              <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 space-y-2">
                 <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-purple-600" />
-                  Ask {activeSpeaker.name} a Direct Question (AMA)
+                  Questions for {activeSpeaker.name}
                 </h3>
-
-                {amaSentSuccess ? (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-emerald-800 text-xs font-semibold">
-                    ✓ Your message has been sent to {activeSpeaker.name}. They will receive it in their speaker dashboard!
-                  </div>
-                ) : (
-                  <form onSubmit={handleSendAMAMessage} className="space-y-2">
-                    <textarea
-                      rows={2}
-                      placeholder={`Send a direct note or question to ${activeSpeaker.name}...`}
-                      value={amaMessage}
-                      onChange={(e) => setAmaMessage(e.target.value)}
-                      className="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-900 resize-none"
-                    ></textarea>
-
-                    <button
-                      type="submit"
-                      disabled={!amaMessage.trim()}
-                      className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition disabled:opacity-50 shadow-xs"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Send Question</span>
-                    </button>
-                  </form>
-                )}
+                <p className="text-xs text-slate-600">
+                  Open one of their sessions and use the live Q&A tab during the conference.
+                  For networking with other delegates, use your Dashboard after signing in.
+                </p>
               </div>
             </div>
           </div>

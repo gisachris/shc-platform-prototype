@@ -95,7 +95,7 @@ export const ConferencesView: React.FC<ConferencesViewProps> = ({
             Conference Directory & Portfolios
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-            Centralized management for physical, virtual, and hybrid national & international summits hosted in Rwanda. Switch active workspaces or publish new conference summits.
+            Browse physical, virtual, and hybrid conferences hosted in Rwanda. Select a conference or publish a new one if you are an organizer.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export const ConferencesView: React.FC<ConferencesViewProps> = ({
                   {isSelected && (
                     <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[11px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Active Workspace</span>
+                      <span>Selected</span>
                     </div>
                   )}
 
@@ -190,7 +190,7 @@ export const ConferencesView: React.FC<ConferencesViewProps> = ({
                           : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
                       }`}
                     >
-                      <span>{isSelected ? 'Current Active Workspace' : 'Switch to This Conference'}</span>
+                      <span>{isSelected ? 'Current Selected' : 'Select conference'}</span>
                       {!isSelected && <ChevronRight className="w-3.5 h-3.5" />}
                     </button>
                   </div>

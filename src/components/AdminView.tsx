@@ -84,7 +84,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const totalRegistrations = attendees.length;
   const checkedInCount = attendees.filter((a) => a.isCheckedIn).length;
 
-  const handleSimulateScanCheckIn = async (e: React.FormEvent) => {
+  const handleTicketCheckIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!scanTicketId.trim()) return;
     try {
@@ -191,10 +191,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
               SHC Platform • Admin Suite
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
-              Organizer Operations Control
+              Organizer console
             </h2>
             <p className="text-xs text-slate-300 mt-1">
-              Manage multi-track schedule, LiveKit WebRTC credentials, QR check-ins, and audit compliance logs.
+              Manage sessions, check-ins, settings, and attendance reports.
             </p>
           </div>
 
@@ -302,17 +302,17 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </div>
           </div>
 
-          {/* QR Check-in Simulator */}
+          {/* Ticket check-in */}
           <div className="bg-white border border-gray-200 rounded-3xl p-6 space-y-4 shadow-xs">
             <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
               <QrCode className="w-5 h-5 text-purple-600" />
               <div>
                 <h3 className="text-base font-bold text-slate-900">Rapid Check-In Ticket Scanner</h3>
-                <p className="text-xs text-slate-500">Enter ticket ID (e.g. TC26-94821) or attendee name to simulate scanning.</p>
+                <p className="text-xs text-slate-500">Enter a ticket ID or QR payload (e.g. SHC-12345678) to check in a delegate.</p>
               </div>
             </div>
 
-            <form onSubmit={handleSimulateScanCheckIn} className="flex gap-3">
+            <form onSubmit={handleTicketCheckIn} className="flex gap-3">
               <input
                 type="text"
                 placeholder="Type ticket ID or scan QR string..."
@@ -324,7 +324,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 type="submit"
                 className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-2xl text-xs transition shadow-xs"
               >
-                Scan & Toggle Status
+                Check In
               </button>
             </form>
 
@@ -407,7 +407,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div>
               <h3 className="text-base font-bold text-slate-900">System Audit Trail & Security Log</h3>
-              <p className="text-xs text-slate-500">Recorded system events, check-in verifications, and LiveKit WebRTC security logs.</p>
+              <p className="text-xs text-slate-500">Recent account, check-in, and session management events.</p>
             </div>
             <button
               onClick={() => api.getAuditLogs().then(setAuditLogs)}
@@ -444,12 +444,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
         <div className="bg-white border border-gray-200 rounded-3xl p-6 space-y-6 shadow-xs max-w-2xl">
           <div className="border-b border-gray-100 pb-3">
             <h3 className="text-base font-bold text-slate-900">Platform System Settings</h3>
-            <p className="text-xs text-slate-500">Configure global conference parameters and LiveKit WebRTC gateways.</p>
+            <p className="text-xs text-slate-500">Conference defaults and live-session server URL.</p>
           </div>
 
           <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">LiveKit WebRTC Server URL</label>
+              <label className="block font-semibold text-slate-700 mb-1">Live session server URL</label>
               <input
                 type="text"
                 value={settings.livekitServerUrl}

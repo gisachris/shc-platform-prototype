@@ -102,8 +102,8 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser, conferenceId }) =
         if (res.aiStatus !== 'ok') {
           alert(
             res.aiStatus === 'unavailable'
-              ? 'Proposal saved. AI review is unavailable (GEMINI_API_KEY / model). Organizers can review manually.'
-              : `Proposal saved. AI review failed: ${res.aiError || 'unknown error'}. Organizers can review manually.`
+              ? 'Proposal saved. Automated review is not configured; organizers will review manually.'
+              : `Proposal saved. Automated review could not run (${res.aiError || 'error'}). Organizers will review manually.`
           );
         }
         setTitle('');
@@ -129,7 +129,7 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser, conferenceId }) =
             Submit & Review Conference Speaker Proposals
           </h2>
           <p className="text-sm text-slate-500">
-            Submit your research paper or workshop abstract. Program organizers evaluate full submissions with automated Gemini AI technical scoring and detailed peer review!
+            Submit your research paper or workshop abstract. Organizers review submissions; optional Gemini scoring assists technical evaluation when configured.
           </p>
         </div>
       </div>
@@ -256,7 +256,7 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser, conferenceId }) =
               className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl text-xs transition shadow-xs flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? (
-                <span>Analyzing Abstract & Registering Submission...</span>
+                <span>Submitting proposal...</span>
               ) : (
                 <>
                   <Send className="w-4 h-4 text-amber-400" />
@@ -270,10 +270,12 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser, conferenceId }) =
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2 text-xs">
               <div className="flex items-center gap-2 text-emerald-800 font-bold">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Proposal Submitted & AI Evaluated!</span>
+                <span>Proposal submitted</span>
               </div>
               <p className="text-slate-600">
-                Score: <strong>{submittedProposal.aiReviewScore}/100</strong>. Feedback: {submittedProposal.aiFeedback}
+                {submittedProposal.aiReviewScore != null
+                  ? <>Score: <strong>{submittedProposal.aiReviewScore}/100</strong>. {submittedProposal.aiFeedback}</>
+                  : (submittedProposal.aiFeedback || 'Your proposal is queued for organizer review.')}
               </p>
             </div>
           )}
@@ -431,19 +433,25 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser, conferenceId }) =
               </div>
             </div>
 
-            {/* Gemini AI Technical Evaluation Breakdown */}
+            {/* AI technical evaluation */}
             <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between border-b border-amber-200/60 pb-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-600" />
-                  <span className="text-xs font-extrabold text-amber-900">Gemini AI Program Assessment</span>
+                  <span className="text-xs font-extrabold text-amber-900">AI program assessment</span>
                 </div>
-                <span className="text-xs font-black text-amber-900 bg-amber-200/80 px-2.5 py-0.5 rounded-full">
-                  Score: {selectedProposal.aiReviewScore}/100
-                </span>
+                {selectedProposal.aiReviewScore != null ? (
+                  <span className="text-xs font-black text-amber-900 bg-amber-200/80 px-2.5 py-0.5 rounded-full">
+                    Score: {selectedProposal.aiReviewScore}/100
+                  </span>
+                ) : (
+                  <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                    Pending
+                  </span>
+                )}
               </div>
               <p className="text-xs text-amber-950 leading-relaxed">
-                {selectedProposal.aiFeedback || 'This talk proposal exhibits strong technical relevance and alignment with audience expectations.'}
+                {selectedProposal.aiFeedback || 'No AI feedback yet. Organizers can still review the abstract manually.'}
               </p>
             </div>
 

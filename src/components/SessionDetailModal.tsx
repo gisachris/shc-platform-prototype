@@ -46,7 +46,6 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   const [activeTab, setActiveTab] = useState<'info' | 'qa' | 'poll'>('info');
   const [questions, setQuestions] = useState<QAQuestion[]>([]);
   const [newQuestionText, setNewQuestionText] = useState('');
-  const [authorName, setAuthorName] = useState('');
   const [poll, setPoll] = useState<SessionPoll | null>(null);
   const [votedOptionId, setVotedOptionId] = useState<string | null>(null);
   const [isSubmittingQ, setIsSubmittingQ] = useState(false);
@@ -65,20 +64,25 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   const handlePostQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newQuestionText.trim()) return;
+    if (!currentUser) {
+      alert('Please sign in to ask a question.');
+      return;
+    }
 
     setIsSubmittingQ(true);
     try {
       const res = await api.submitQA({
         sessionId: session.id,
         text: newQuestionText.trim(),
-        authorCompany: currentUser?.company,
+        authorCompany: currentUser.company,
       });
       if (res.success) {
         setQuestions([res.question, ...questions]);
         setNewQuestionText('');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || 'Could not post question. Please sign in and try again.');
     } finally {
       setIsSubmittingQ(false);
     }
@@ -258,7 +262,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Downloadable Resources & Links & LiveKit WebRTC Button */}
+              {/* Resources & live session */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-200">
                 <div className="flex flex-wrap items-center gap-2">
                   {onOpenLiveKitRoom && (
@@ -270,7 +274,7 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                       className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-4 py-2 rounded-xl text-xs transition shadow-md shadow-blue-600/20"
                     >
                       <Video className="w-4 h-4 text-white" />
-                      <span>Join Live WebRTC Conference Room</span>
+                      <span>Join Live Session</span>
                     </button>
                   )}
 
@@ -311,15 +315,9 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
                   Ask the Speaker a Question
                 </h4>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Your Name (Optional)"
-                    value={authorName}
-                    onChange={(e) => setAuthorName(e.target.value)}
-                    className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-900"
-                  />
-                </div>
+                {!currentUser && (
+                  <p className="text-[11px] text-slate-500">Sign in to post questions under your name.</p>
+                )}
 
                 <div className="flex items-center gap-2">
                   <textarea

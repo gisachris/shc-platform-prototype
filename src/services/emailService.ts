@@ -26,10 +26,10 @@ export const emailService = {
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     if (!serviceId || !templateId || !publicKey || serviceId.includes('your_emailjs')) {
-      console.warn('EmailJS environment variables not yet configured. Simulated confirmation sent.');
+      console.warn('EmailJS environment variables not yet configured. Skipping confirmation email.');
       return {
         success: true,
-        message: 'Simulation: Welcome email logged (EmailJS credentials pending).'
+        message: 'Account created. Email confirmation is not configured on this deployment.'
       };
     }
 
@@ -62,13 +62,13 @@ export const emailService = {
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID_RESET;
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-    const actualResetLink = reset_link || `${window.location.origin}/reset-password?token=${reset_token || 'demo-reset-token-123'}`;
+    const actualResetLink = reset_link || `${window.location.origin}/reset-password?token=${reset_token || 'pending-reset'}`;
 
     if (!serviceId || !templateId || !publicKey || serviceId.includes('your_emailjs')) {
-      console.warn('EmailJS environment variables not yet configured. Simulated password reset sent.');
+      console.warn('EmailJS environment variables not yet configured. Skipping password reset email.');
       return {
         success: true,
-        message: 'Simulation: Password reset email logged (EmailJS credentials pending).'
+        message: 'Password reset email is not configured. Contact an organizer for help.'
       };
     }
 
@@ -80,7 +80,7 @@ export const emailService = {
           to_name,
           to_email,
           reset_link: actualResetLink,
-          reset_token: reset_token || 'demo-token',
+          reset_token: reset_token || 'pending',
           app_name: 'Smart Hybrid Conference (SHC)',
           site_url: window.location.origin,
         },

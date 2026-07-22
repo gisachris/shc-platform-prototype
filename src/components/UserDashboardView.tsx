@@ -131,7 +131,7 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <img
-              src={currentUser.avatarUrl || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`}
+              src={currentUser.avatar || ''}
               alt={currentUser.fullName}
               className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-4 ring-amber-400/30 shadow-md"
             />
@@ -197,7 +197,7 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
             <Mic className="w-4 h-4 text-purple-600" />
           </div>
           <div className="text-2xl font-black text-slate-900">{speakers.length}</div>
-          <p className="text-[11px] text-slate-500">Global thought leaders</p>
+          <p className="text-[11px] text-slate-500">Conference speakers</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs space-y-1">

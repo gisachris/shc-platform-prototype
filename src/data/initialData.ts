@@ -20,13 +20,13 @@ export const TICKET_TIERS: TicketTier[] = [
     id: 'general',
     name: 'General All-Access Pass',
     price: 0,
-    description: '100% free access to all conference keynotes, breakouts, and live WebRTC conferencing rooms.',
+    description: 'Free access to conference keynotes, breakouts, and live virtual sessions.',
     features: [
-      'Free Access to 3 Days of Main Sessions',
-      'Live WebRTC Video & Audio Conferencing Rooms',
-      'Exhibition Hall & Networking Lounges',
-      'Digital Attendee Badge & Instant Mobile Pass',
-      'Session Recordings & Materials'
+      'Access to 3 days of main sessions',
+      'Live virtual session rooms',
+      'Exhibition hall & networking lounges',
+      'Digital attendee badge & mobile pass',
+      'Session recordings & materials'
     ],
     badgeColor: 'bg-blue-600'
   },
@@ -34,14 +34,14 @@ export const TICKET_TIERS: TicketTier[] = [
     id: 'vip',
     name: 'VIP All-Access Pass',
     price: 0,
-    description: 'Complete VIP experience with front-row seating, speaker lounge, and LiveKit WebRTC stage access.',
+    description: 'VIP experience with front-row seating, speaker lounge, and priority live-session access.',
     popular: true,
     features: [
       'Everything in General Access Pass',
-      'Reserved Front-Row Seating at Keynotes',
-      'VIP Speaker Live WebRTC Lounge Access',
-      'Interactive Speaker Q&A & Mentorship',
-      'Instant Digital Badge & Pass Verification'
+      'Reserved front-row seating at keynotes',
+      'VIP speaker lounge access',
+      'Interactive speaker Q&A & mentorship',
+      'Digital badge & pass verification'
     ],
     badgeColor: 'bg-amber-500'
   },
@@ -49,7 +49,7 @@ export const TICKET_TIERS: TicketTier[] = [
     id: 'workshop',
     name: 'Workshop & Lab Access Pass',
     price: 0,
-    description: 'Includes full conference access plus hands-on technical WebRTC workshop rooms.',
+    description: 'Includes full conference access plus hands-on technical workshop rooms.',
     features: [
       'Everything in General Access Pass',
       'Hands-on Live Lab Access',
@@ -63,12 +63,12 @@ export const TICKET_TIERS: TicketTier[] = [
     id: 'virtual',
     name: 'Virtual Global Pass',
     price: 0,
-    description: 'Stream live keynotes and interactive WebRTC conferencing remotely from anywhere in the world.',
+    description: 'Stream live keynotes and join interactive sessions remotely.',
     features: [
-      'Live HD Streaming & WebRTC Conferencing',
-      'Interactive Live Q&A, Polls, and Chat',
-      'Digital Networking Lounge',
-      'On-Demand Video Replays'
+      'Live streaming of keynotes and sessions',
+      'Interactive live Q&A, polls, and chat',
+      'Digital networking lounge',
+      'On-demand video replays'
     ],
     badgeColor: 'bg-emerald-600'
   }
@@ -667,8 +667,8 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-2',
-    title: 'LiveKit WebRTC Conferencing Active',
-    message: 'Live WebRTC video conferencing rooms are now active for Keynote and Track sessions.',
+    title: 'Live sessions are open',
+    message: 'Virtual rooms are now active for keynote and track sessions.',
     timestamp: '25 mins ago',
     type: 'alert',
     read: false,
@@ -684,16 +684,16 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     target: 'Dr. Sarah Jenkins (Attendee)',
     timestamp: '2026-07-21 16:45:10',
     category: 'checkin',
-    details: 'Ticket #TC-2026-9021 verified at Main Entrance Hall A'
+    details: 'Ticket #SHC-2026-9021 verified at Main Entrance Hall A'
   },
   {
     id: 'audit-2',
     action: 'LiveKit Room Token Issued',
     actor: 'LiveKit Gateway Service',
-    target: 'Room techcon-session-ses-1',
+    target: 'Room shc-session-ses-1',
     timestamp: '2026-07-21 17:10:02',
     category: 'session',
-    details: 'Generated WebRTC access token for presenter role'
+    details: 'Generated live-session access token for presenter role'
   }
 ];
 
@@ -711,7 +711,7 @@ export const INITIAL_DIRECT_MESSAGES: DirectMessage[] = [
 
 export const INITIAL_SYSTEM_SETTINGS: SystemSettings = {
   autoApproveRegistration: true,
-  livekitServerUrl: process.env.LIVEKIT_URL || 'wss://demo.livekit.cloud',
+  livekitServerUrl: process.env.LIVEKIT_URL || '',
   smtpConfigured: true,
   emergencyHotline: '+250 788 313 131',
   allowPublicCFP: true,
@@ -783,7 +783,7 @@ export const INITIAL_USERS: (User & { passwordHash?: string })[] = [
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80',
     ticketTier: 'vip',
     ticketId: 'MIN-ADM-01',
-    bio: 'Managing platform credentials, LiveKit WebRTC gateways, and system parameters.',
+    bio: 'Managing platform credentials, live-session gateways, and system parameters.',
     passwordHash: 'password123'
   },
   {

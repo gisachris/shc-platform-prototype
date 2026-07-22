@@ -13,10 +13,8 @@ import {
   Users, 
   Mic, 
   CheckCircle2, 
-  Lock, 
   LogIn, 
   UserPlus, 
-  Award,
   Globe2,
   FileText,
   Phone,
@@ -26,12 +24,7 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
-  Send,
-  AlertCircle,
-  ExternalLink,
-  Info,
-  Layers,
-  Cpu
+  Send
 } from 'lucide-react';
 
 interface LandingPageViewProps {
@@ -77,35 +70,34 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName || !contactEmail || !contactMessage) return;
+    const subject = encodeURIComponent(`[SHC] ${contactCategory}`);
+    const body = encodeURIComponent(
+      `Name: ${contactName}\nEmail: ${contactEmail}\nCategory: ${contactCategory}\n\n${contactMessage}`
+    );
+    window.location.href = `mailto:support@kigali2026.rw?subject=${subject}&body=${body}`;
     setContactSubmitted(true);
-    setTimeout(() => {
-      setContactSubmitted(false);
-      setContactName('');
-      setContactEmail('');
-      setContactMessage('');
-    }, 4000);
   };
 
   const faqItems = [
     {
-      q: 'How do I access internal conference tools like Schedule or Networking?',
-      a: 'Sign in or create an attendee account to access your schedule, networking, virtual sessions, and tourism guide. Organizer tools require an administrator-provisioned account.'
+      q: 'How do I access the schedule and networking tools?',
+      a: 'Create an account or sign in. Attendees can save sessions, network with other delegates, join live rooms, and browse the tourism guide.'
     },
     {
-      q: 'What is the role boundary between an Attendee and an Organizer?',
-      a: 'Attendees can bookmark sessions, network with other delegates, and view tourism guides. Organizers have access to the Organizer Workspace to manage schedules, scan ticket QR codes, review speaker Call for Papers (CFP), and publish conferences.'
+      q: 'What can organizers do that attendees cannot?',
+      a: 'Organizers can manage the schedule, check in attendees by ticket, review Call for Papers submissions, publish conferences, and export attendance reports.'
     },
     {
-      q: 'How does remote WebRTC hybrid streaming work?',
-      a: 'The platform integrates LiveKit Cloud WebRTC servers. Remote delegates can join high-definition, sub-second latency video streams, participate in live Q&A, and vote in audience polls directly from their browser.'
+      q: 'How do remote (virtual) sessions work?',
+      a: 'After signing in, open a session and choose Join Live Room. Sessions run in your browser with audio and video via LiveKit.'
     },
     {
-      q: 'What are the visa requirements for attending in Kigali, Rwanda?',
-      a: 'Rwanda offers Visa-on-Arrival to citizens of ALL countries worldwide. Delegates holding African Union, Commonwealth, and OIF passports receive free 30-day tourist visas upon arrival at Kigali International Airport (KGL).'
+      q: 'What are the visa requirements for attending in Kigali?',
+      a: 'Rwanda offers visa-on-arrival for many nationalities. Check current requirements with your embassy or visitrwanda.com before travel.'
     },
     {
-      q: 'How do I submit a presentation abstract for Call for Papers (CFP)?',
-      a: 'Once signed in, click on the "CFP" tab. You can submit abstracts for tracks such as AI & Machine Learning, Cloud Architecture, or FinTech. Submissions are auto-scored by Gemini AI for instant technical feedback.'
+      q: 'How do I submit a Call for Papers (CFP) abstract?',
+      a: 'Open the CFP tab, fill in your abstract, and submit. If AI review is configured, you may receive automated feedback; organizers make the final decision.'
     }
   ];
 
@@ -126,7 +118,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             <Building2 className="w-4 h-4 text-amber-400" />
             <span>SHC Platform • Smart Hybrid Summit Portal</span>
             <span className="bg-amber-400/20 text-amber-300 text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase">
-              Official Portal
+              Conference portal
             </span>
           </div>
 
@@ -139,7 +131,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               </span>
             </h1>
             <p className="text-slate-300 text-sm sm:text-base lg:text-lg font-medium leading-relaxed">
-              An integrated platform for the Rwanda Convention Bureau case study — registration, hybrid LiveKit sessions, engagement tools, networking, analytics, and tourism information in one system.
+              Plan, host, and join hybrid conferences from one place — registration, live sessions, engagement tools, networking, analytics, and local tourism guides.
             </p>
           </div>
 
@@ -217,27 +209,27 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             Pioneering Africa's Digital Summit Capital in Kigali
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            The Smart Hybrid Conference (SHC) Platform was engineered in partnership with the <strong>Rwanda Tech Council</strong> and the <strong>Ministry of ICT & Innovation</strong> to establish a world-class, digital-first infrastructure for international summits hosted in Rwanda.
+            SHC helps organizers run hybrid conferences in one place — registration, scheduling, live sessions, engagement tools, networking, and tourism information for delegates visiting Rwanda.
           </p>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            Whether delegates gather in person under the iconic dome of the <strong>Kigali Convention Centre</strong> or connect remotely from Tokyo, London, or San Francisco, SHC delivers unified HD WebRTC video, real-time interactive Q&A, AI itinerary matching, and instant QR badge verification.
+            Join onsite at venues such as the <strong>Kigali Convention Centre</strong>, or attend remotely through browser-based live rooms with Q&A, polls, and digital tickets.
           </p>
 
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-1">
               <div className="text-blue-600 font-extrabold text-sm flex items-center gap-1.5">
                 <Globe2 className="w-4 h-4" />
-                <span>Pan-African Summit Hub</span>
+                <span>Hybrid by design</span>
               </div>
-              <p className="text-[11px] text-slate-500">Hosting delegates from over 75 countries annually in Kigali.</p>
+              <p className="text-[11px] text-slate-500">Support onsite and remote delegates in the same event.</p>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-1">
               <div className="text-emerald-600 font-extrabold text-sm flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4" />
-                <span>Enterprise Security</span>
+                <span>Role-based access</span>
               </div>
-              <p className="text-[11px] text-slate-500">Encrypted token auth and strict multi-tenant role control.</p>
+              <p className="text-[11px] text-slate-500">Attendees, speakers, and organizers see the tools they need.</p>
             </div>
           </div>
         </div>
@@ -260,9 +252,9 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       {/* 4. CORE PLATFORM PILLARS (3 CARDS) */}
       <div className="space-y-6">
         <div className="text-center space-y-1 max-w-2xl mx-auto">
-          <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">Architectural Superiority</span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Core Capabilities of the Platform</h2>
-          <p className="text-xs sm:text-sm text-slate-500">Designed to give organizers full operational control and delegates an effortless summit experience.</p>
+          <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest">Platform Features</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">What you can do with SHC</h2>
+          <p className="text-xs sm:text-sm text-slate-500">Built for organizers and delegates running hybrid events in Rwanda.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -271,13 +263,13 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               <div className="w-11 h-11 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
                 <Video className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-slate-900 text-sm">WebRTC HD Hybrid Streaming</h3>
+              <h3 className="font-extrabold text-slate-900 text-sm">Hybrid live sessions</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Powered by LiveKit Cloud. Remote delegates stream keynotes with sub-second latency, screen sharing, and multi-track audio.
+                Join keynotes and breakouts from the browser with LiveKit — audio, video, and screen sharing for remote delegates.
               </p>
             </div>
             <div className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg w-fit">
-              LiveKit Cloud Integration
+              LiveKit
             </div>
           </div>
 
@@ -286,13 +278,13 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-slate-900 text-sm">AI Itinerary & CFP Scoring</h3>
+              <h3 className="font-extrabold text-slate-900 text-sm">CFP review assistance</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Integrated Gemini 3.6 Flash engine auto-scores Call for Papers proposals and constructs personalized itineraries for delegates.
+                Speakers submit abstracts through Call for Papers. Optional AI feedback helps organizers review clarity and fit — final decisions stay with the committee.
               </p>
             </div>
             <div className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg w-fit">
-              Gemini 3.6 Flash
+              Optional Gemini assist
             </div>
           </div>
 
@@ -301,13 +293,13 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
                 <QrCode className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-slate-900 text-sm">Paperless QR Badging & Check-In</h3>
+              <h3 className="font-extrabold text-slate-900 text-sm">Digital tickets & check-in</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Instant digital ticket generation with encrypted QR badges. Desk stations scan and verify attendee passes in under 1 second.
+                Register online to receive a digital pass. Organizers check attendees in using the ticket ID or QR payload at the desk.
               </p>
             </div>
             <div className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit">
-              Zero-Wait Desk Check-in
+              Ticket check-in
             </div>
           </div>
         </div>
@@ -317,8 +309,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
           <div>
-            <span className="text-xs font-extrabold text-blue-600 uppercase tracking-wider">World-Class Thought Leaders</span>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Keynote Speakers Spotlight</h2>
+            <span className="text-xs font-extrabold text-blue-600 uppercase tracking-wider">Featured speakers</span>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Keynote speakers</h2>
           </div>
           <p className="text-xs text-slate-500 max-w-md">
             Distinguished experts shaping artificial intelligence, distributed cloud infrastructure, and African digital economy.
@@ -402,23 +394,13 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             </p>
           </div>
 
-          {!currentUser ? (
-            <button
-              onClick={() => onOpenAuth('login')}
-              className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-5 py-3 rounded-2xl transition shrink-0 flex items-center gap-2"
-            >
-              <span>Sign In to Access Travel Guide</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={() => onNavigateTab('tourism')}
-              className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-5 py-3 rounded-2xl transition shrink-0 flex items-center gap-2"
-            >
-              <span>Open Rwanda Tourism Guide</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={() => onNavigateTab('tourism')}
+            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-5 py-3 rounded-2xl transition shrink-0 flex items-center gap-2"
+          >
+            <span>Open Rwanda Tourism Guide</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -514,7 +496,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl space-y-3">
               <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-xs">
                 <Mail className="w-4 h-4 text-emerald-600" />
-                <span>Official Email Inquiries</span>
+                <span>Email inquiries</span>
               </div>
               <p className="text-xs text-slate-700">
                 info@rcb.rw • support@kigali2026.rw<br />
@@ -530,9 +512,10 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                 <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h4 className="font-extrabold text-slate-900 text-base">Message Sent Successfully!</h4>
+                <h4 className="font-extrabold text-slate-900 text-base">Email client opened</h4>
                 <p className="text-xs text-slate-600 max-w-md mx-auto">
-                  Thank you for contacting the Summit Secretariat. Our team will review your message and respond to <strong>{contactEmail}</strong> within 12 hours.
+                  Your message was prepared for <strong>support@kigali2026.rw</strong>. Send it from your mail app to complete the inquiry
+                  {contactEmail ? <> (reply address: <strong>{contactEmail}</strong>)</> : null}.
                 </p>
               </div>
             ) : (
@@ -603,29 +586,10 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
         </div>
       </div>
 
-      {/* 9. STRATEGIC PARTNERS & SPONSORS */}
-      <div className="space-y-4 pt-4">
-        <div className="text-center text-xs font-extrabold text-slate-400 uppercase tracking-widest">
-          Supported & Hosted By Premier Institutions
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 opacity-70 hover:opacity-100 transition">
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-xs font-extrabold text-slate-800">
-            <Building2 className="w-4 h-4 text-blue-600" />
-            <span>Rwanda Tech Council</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-xs font-extrabold text-slate-800">
-            <Globe2 className="w-4 h-4 text-indigo-600" />
-            <span>Smart Africa Secretariat</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-xs font-extrabold text-slate-800">
-            <Cpu className="w-4 h-4 text-emerald-600" />
-            <span>Ministry of ICT & Innovation</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-xs font-extrabold text-slate-800">
-            <Award className="w-4 h-4 text-amber-600" />
-            <span>Carnegie Mellon University Africa</span>
-          </div>
-        </div>
+      <div className="space-y-2 pt-4 text-center">
+        <p className="text-xs text-slate-500">
+          Hosted for events in Kigali — venues including the Kigali Convention Centre.
+        </p>
       </div>
     </div>
   );

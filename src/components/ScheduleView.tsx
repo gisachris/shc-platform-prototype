@@ -532,7 +532,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
                           className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition"
                         >
                           <Video className="w-3.5 h-3.5" />
-                          <span>Join WebRTC Room</span>
+                          <span>Join Live Room</span>
                         </button>
                       )}
 

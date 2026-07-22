@@ -50,7 +50,7 @@ const PASS_OPTIONS: PassOption[] = [
       'Access to Keynote Auditoriums & Technical Breakout Track Rooms',
       'Exhibition Floor & Innovation Showcase Access',
       'Networking Lunches, Coffee Breaks & Gala Reception',
-      'Official Delegate Welcome Kit & Printed NFC Smart Badge',
+      'Welcome kit and printed badge',
       'Access to HD Live Streams & On-Demand Session Recordings'
     ]
   },
@@ -59,13 +59,13 @@ const PASS_OPTIONS: PassOption[] = [
     title: 'Virtual / Online Pass',
     badgeLabel: 'Global Digital Access',
     badgeColor: 'bg-blue-600',
-    description: 'Remote high-definition live-stream access, WebRTC interactive speaker Q&A, and digital networking portal.',
+    description: 'Remote live-session access, interactive Q&A, and digital networking.',
     benefits: [
       'Interactive 1080p HD Live Stream with Multi-Track Switching',
-      'Real-Time WebRTC Speaker Q&A & Live Audience Polling',
+      'Live session Q&A and audience polls',
       'Digital Attendee Networking Directory & 1-on-1 Chat Portal',
       'On-Demand Access to Video Archives & Speaker Presentation Decks',
-      'Digital Verified Certificate of Participation'
+      'Digital certificate of participation'
     ]
   }
 ];
@@ -170,10 +170,10 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
       <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
         <div className="max-w-3xl space-y-2 relative z-10">
           <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            SHC Platform • Official Pass Generator
+            SHC Platform • Registration
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Conference Registration & Delegate Pass Studio
+            Conference registration & delegate pass
           </h2>
           <p className="text-sm text-slate-500">
             Select your preferred conference event, choose between In-Person or Virtual access passes, and generate your official delegate pass.
@@ -313,7 +313,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
                   className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Print Official Badge</span>
+                  <span>Print badge</span>
                 </button>
 
                 <button
@@ -536,7 +536,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
 
             {/* Footer Pass details */}
             <div className="text-center text-[10px] text-slate-500 pt-2 border-t border-gray-200">
-              {selectedConf?.venueName || 'Kigali Convention Centre'} • Official RCB Verified Delegate Pass
+              {selectedConf?.venueName || 'Kigali Convention Centre'} • Digital Delegate Pass
             </div>
           </div>
         </div>

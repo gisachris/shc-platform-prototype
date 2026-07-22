@@ -68,11 +68,8 @@ export const Header: React.FC<HeaderProps> = ({
     api.getNotifications().then(setNotifications).catch(console.error);
   };
 
-  // Poll for live notifications and click outside listener
+  // Notifications only for signed-in users; click-outside for menus
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 8000);
-
     const handleOutsideClick = (event: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
@@ -83,11 +80,20 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     document.addEventListener('mousedown', handleOutsideClick);
+
+    if (!currentUser) {
+      setNotifications([]);
+      setIsNotifOpen(false);
+      return () => document.removeEventListener('mousedown', handleOutsideClick);
+    }
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 8000);
     return () => {
       clearInterval(interval);
       document.removeEventListener('mousedown', handleOutsideClick);
     };
-  }, []);
+  }, [currentUser]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -103,7 +109,6 @@ export const Header: React.FC<HeaderProps> = ({
   // Determine role permissions for tabs
   const userRole = currentUser?.role || 'guest';
   const canAccessOrganizer = ['organizer', 'administrator', 'super_admin'].includes(userRole);
-  const isGuest = !currentUser || userRole === 'guest';
 
   const rolePillColors: Record<UserRole, string> = {
     guest: 'bg-slate-100 text-slate-700 border-slate-300',
@@ -128,19 +133,21 @@ export const Header: React.FC<HeaderProps> = ({
             <span>SHC Platform • Kigali Convention Centre</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsLiveSimulated(!isLiveSimulated)}
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold transition ${
-                isLiveSimulated 
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
-                  : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
-              }`}
-            >
-              <Radio className={`w-3 h-3 ${isLiveSimulated ? 'animate-pulse text-emerald-400' : ''}`} />
-              <span>{isLiveSimulated ? 'Live Clock Active' : 'Simulate Conference Day'}</span>
-            </button>
-          </div>
+          {currentUser && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsLiveSimulated(!isLiveSimulated)}
+                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold transition ${
+                  isLiveSimulated
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
+                }`}
+              >
+                <Radio className={`w-3 h-3 ${isLiveSimulated ? 'animate-pulse text-emerald-400' : ''}`} />
+                <span>{isLiveSimulated ? 'Schedule clock on' : 'Schedule clock paused'}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -167,23 +174,71 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Dynamic Role-Based Navigation Links */}
         <div className="flex items-center gap-2">
           <nav className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
-            {/* Landing Page Link */}
-            <button
-              onClick={() => setActiveTab('landing')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
-                activeTab === 'landing'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              <span>Home</span>
-            </button>
+            {/* Public browsing tabs (available before sign-in) */}
+            {!currentUser && (
+              <>
+                <button
+                  onClick={() => setActiveTab('conferences')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'conferences'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>Conferences</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('speakers')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'speakers'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Mic className="w-4 h-4" />
+                  <span>Speakers</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('registration')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'registration'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Ticket className="w-4 h-4" />
+                  <span>Register</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('tourism')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'tourism'
+                      ? 'bg-emerald-700 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Compass className={`w-4 h-4 ${activeTab === 'tourism' ? 'text-white' : 'text-emerald-600'}`} />
+                  <span>Tourism</span>
+                </button>
+              </>
+            )}
 
-            {/* Internal Application Tabs - ONLY VISIBLE WHEN USER IS LOGGED IN */}
+            {/* Signed-in application tabs */}
             {currentUser && (
               <>
-                {/* Schedule */}
+                <button
+                  onClick={() => setActiveTab('landing')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === 'landing'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </button>
+
                 <button
                   onClick={() => setActiveTab('schedule')}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
@@ -267,7 +322,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>CFP</span>
                 </button>
 
-                {/* Organizer Workspace (Strictly for Organizers, Administrators, and Super Admins) */}
+                {/* Organizer tools */}
                 {canAccessOrganizer && (
                   <button
                     onClick={() => setActiveTab('admin')}
@@ -278,7 +333,7 @@ export const Header: React.FC<HeaderProps> = ({
                     }`}
                   >
                     <ShieldAlert className={`w-4 h-4 ${activeTab === 'admin' ? 'text-white' : 'text-purple-600'}`} />
-                    <span>Organizer Workspace</span>
+                    <span>Admin</span>
                   </button>
                 )}
               </>
@@ -287,55 +342,55 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* User Profile / Auth State Controls */}
           <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
-            {/* Notification Bell */}
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className="p-2 rounded-xl border border-gray-200 text-slate-700 hover:bg-gray-100 transition relative"
-                title="System Notifications"
-              >
-                <Bell className="w-4 h-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
+            {currentUser && (
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  className="p-2 rounded-xl border border-gray-200 text-slate-700 hover:bg-gray-100 transition relative"
+                  title="Notifications"
+                >
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
 
-              {/* Notification Dropdown Menu */}
-              {isNotifOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden text-xs animate-fadeIn">
-                  <div className="bg-slate-900 text-white p-3.5 flex items-center justify-between">
-                    <span className="font-extrabold">Notifications</span>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={handleMarkAllRead}
-                        className="text-[10px] text-blue-300 hover:text-white font-semibold flex items-center gap-1"
-                      >
-                        <Check className="w-3 h-3" />
-                        <span>Mark all read</span>
-                      </button>
-                    )}
-                  </div>
+                {isNotifOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden text-xs animate-fadeIn">
+                    <div className="bg-slate-900 text-white p-3.5 flex items-center justify-between">
+                      <span className="font-extrabold">Notifications</span>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          className="text-[10px] text-blue-300 hover:text-white font-semibold flex items-center gap-1"
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>Mark all read</span>
+                        </button>
+                      )}
+                    </div>
 
-                  <div className="max-h-72 overflow-y-auto divide-y divide-gray-100">
-                    {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-slate-400">No notifications</div>
-                    ) : (
-                      notifications.map((n) => (
-                        <div key={n.id} className={`p-3 space-y-1 ${n.read ? 'bg-white' : 'bg-blue-50/50'}`}>
-                          <div className="flex items-center justify-between font-bold text-slate-900">
-                            <span>{n.title}</span>
-                            <span className="text-[10px] text-slate-400 font-normal">{n.timestamp}</span>
+                    <div className="max-h-72 overflow-y-auto divide-y divide-gray-100">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-slate-400">No notifications</div>
+                      ) : (
+                        notifications.map((n) => (
+                          <div key={n.id} className={`p-3 space-y-1 ${n.read ? 'bg-white' : 'bg-blue-50/50'}`}>
+                            <div className="flex items-center justify-between font-bold text-slate-900">
+                              <span>{n.title}</span>
+                              <span className="text-[10px] text-slate-400 font-normal">{n.timestamp}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 leading-snug">{n.message}</p>
                           </div>
-                          <p className="text-[11px] text-slate-600 leading-snug">{n.message}</p>
-                        </div>
-                      ))
-                    )}
+                        ))
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* AUTH / PROFILE TRIGGER */}
             {currentUser ? (

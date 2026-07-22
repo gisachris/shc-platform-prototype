@@ -21,7 +21,7 @@ const ORGANIZER_ROLES = ['organizer', 'administrator', 'super_admin'];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('landing');
-  const [currentConferenceId, setCurrentConferenceId] = useState<string>('conf-rwanda-2026');
+  const [currentConferenceId, setCurrentConferenceId] = useState<string>('conf-kigali-2026');
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -310,12 +310,12 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <span className="font-bold text-slate-900">SHC Platform</span>
-            {' '}• Smart Hybrid Conference Management — Case Study: Rwanda Convention Bureau
+            {' '}• Smart Hybrid Conference Management
           </div>
           <div className="flex items-center gap-4 text-slate-500">
-            <span>University of Kigali</span>
+            <span>Kigali, Rwanda</span>
             <span>•</span>
-            <span>LiveKit Hybrid Sessions</span>
+            <span>Hybrid sessions powered by LiveKit</span>
           </div>
         </div>
       </footer>
