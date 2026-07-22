@@ -348,7 +348,7 @@ export const INITIAL_SESSIONS: Session[] = [
   },
   {
     id: 'ses-10',
-    title: 'Closing Keynote & TechCon 2026 Innovation Awards',
+    title: 'Closing Keynote & SHC Rwanda Innovation Awards',
     description: 'Celebrating breakthrough open-source projects, community leaders, and vision for the future of developer tools.',
     day: 3,
     startTime: '03:30 PM',

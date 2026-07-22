@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
 import { Attendee, Conference } from '../types';
 import { api } from '../services/api';
 import { 
@@ -10,7 +9,6 @@ import {
   Mail, 
   Briefcase, 
   Building, 
-  Sparkles, 
   Printer, 
   Download, 
   ShieldCheck, 
@@ -21,11 +19,13 @@ import {
   Building2,
   Globe,
   MapPin,
-  Calendar
+  Calendar,
+  Sparkles
 } from 'lucide-react';
 
 interface RegistrationViewProps {
   onRegistrationSuccess: (newAttendee: Attendee) => void;
+  conferenceId?: string;
 }
 
 export type PassType = 'in_person' | 'online';
@@ -70,7 +70,7 @@ const PASS_OPTIONS: PassOption[] = [
   }
 ];
 
-export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrationSuccess }) => {
+export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrationSuccess, conferenceId }) => {
   const [selectedPassType, setSelectedPassType] = useState<PassType>('in_person');
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConferenceId, setSelectedConferenceId] = useState<string>('');
@@ -137,24 +137,20 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
         fullName: fullName.trim(),
         email: email.trim(),
         company: company.trim() || 'Independent',
-        jobTitle: jobTitle.trim() || 'Tech Professional',
-        ticketTier: selectedPassType === 'in_person' ? 'vip' : 'standard',
+        jobTitle: jobTitle.trim() || 'Conference Participant',
+        ticketTier: selectedPassType === 'in_person' ? 'general' : 'virtual',
         interests: selectedInterests,
         dietaryPreference: dietary,
         tshirtSize,
         isNetworkingOptIn,
-        bio: bio.trim()
+        bio: bio.trim(),
+        conferenceId: selectedConferenceId || conferenceId,
+        attendanceMode: selectedPassType === 'in_person' ? 'onsite' : 'virtual',
       });
 
       if (res.success) {
         setCreatedAttendee(res.attendee);
         onRegistrationSuccess(res.attendee);
-        
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
       }
     } catch (err) {
       console.error(err);
@@ -307,7 +303,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
                 <h4 className="text-lg font-bold text-slate-900">Pass Registered Successfully!</h4>
                 <p className="text-xs text-slate-600 mt-1">
                   Your ticket ID is <strong className="text-emerald-700">{createdAttendee.ticketId}</strong> for{' '}
-                  <strong>{selectedConf?.title || 'TechCon 2026'}</strong>.
+                  <strong>{selectedConf?.title || 'SHC Rwanda Conference'}</strong>.
                 </p>
               </div>
 
@@ -493,7 +489,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  {selectedConf ? selectedConf.title : 'TechCon 2026'}
+                  {selectedConf ? selectedConf.title : 'SHC Rwanda Conference'}
                 </div>
                 <div className="text-xs font-black text-slate-900 uppercase">
                   {selectedPassOption.title}

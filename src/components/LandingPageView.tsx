@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, UserRole, Conference } from '../types';
+import { User, Conference } from '../types';
 import { 
   Sparkles, 
   Video, 
@@ -35,9 +35,8 @@ import {
 } from 'lucide-react';
 
 interface LandingPageViewProps {
-  onOpenAuth: (mode?: 'login' | 'register' | 'demo') => void;
+  onOpenAuth: (mode?: 'login' | 'register') => void;
   onNavigateTab: (tab: string) => void;
-  onQuickDemoLogin: (role: UserRole) => void;
   stats: {
     totalAttendees: number;
     checkedInCount: number;
@@ -51,7 +50,6 @@ interface LandingPageViewProps {
 export const LandingPageView: React.FC<LandingPageViewProps> = ({
   onOpenAuth,
   onNavigateTab,
-  onQuickDemoLogin,
   stats,
   conferences,
   currentUser
@@ -91,7 +89,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   const faqItems = [
     {
       q: 'How do I access internal conference tools like Schedule or Networking?',
-      a: 'Internal workspace features require authenticating as a delegate, speaker, moderator, or organizer. You can Sign In or click "1-Click Demo Personas" at the top of the page to test role-specific views.'
+      a: 'Sign in or create an attendee account to access your schedule, networking, virtual sessions, and tourism guide. Organizer tools require an administrator-provisioned account.'
     },
     {
       q: 'What is the role boundary between an Attendee and an Organizer?',
@@ -141,7 +139,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               </span>
             </h1>
             <p className="text-slate-300 text-sm sm:text-base lg:text-lg font-medium leading-relaxed">
-              Powering premier summits at <strong className="text-white">Kigali Convention Centre</strong> with sub-second WebRTC streams, paperless QR badging, AI itinerary matching, and strict multi-role authorization.
+              An integrated platform for the Rwanda Convention Bureau case study — registration, hybrid LiveKit sessions, engagement tools, networking, analytics, and tourism information in one system.
             </p>
           </div>
 
@@ -150,39 +148,26 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             {!currentUser ? (
               <>
                 <button
-                  onClick={() => onOpenAuth('demo')}
-                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-6 py-3.5 rounded-2xl text-xs sm:text-sm flex items-center gap-2 shadow-xl shadow-amber-400/20 transition transform hover:-translate-y-0.5"
+                  onClick={() => onOpenAuth('register')}
+                  className="bg-white hover:bg-slate-100 text-slate-950 font-black px-6 py-3.5 rounded-2xl text-xs sm:text-sm flex items-center gap-2 shadow-xl transition transform hover:-translate-y-0.5"
                 >
-                  <Sparkles className="w-4 h-4 text-slate-950" />
-                  <span>Try 1-Click Demo Personas</span>
+                  <UserPlus className="w-4 h-4" />
+                  <span>Register for Conference</span>
                 </button>
 
                 <button
                   onClick={() => onOpenAuth('login')}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-6 py-3.5 rounded-2xl text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-blue-600/30 transition"
+                  className="bg-slate-800 hover:bg-slate-700 text-white font-extrabold px-6 py-3.5 rounded-2xl text-xs sm:text-sm flex items-center gap-2 border border-slate-600 transition"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Sign In</span>
                 </button>
-
-                <button
-                  onClick={() => onOpenAuth('register')}
-                  className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm border border-slate-700 flex items-center gap-2 transition"
-                >
-                  <UserPlus className="w-4 h-4 text-emerald-400" />
-                  <span>Register Pass</span>
-                </button>
               </>
             ) : (
               <div className="flex items-center gap-3 bg-slate-800/90 border border-slate-700/80 p-3.5 rounded-2xl">
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.fullName}
-                  className="w-11 h-11 rounded-full object-cover border border-blue-400"
-                />
                 <div>
                   <div className="text-xs font-bold text-white flex items-center gap-2">
-                    <span>Authenticated as {currentUser.fullName}</span>
+                    <span>Signed in as {currentUser.fullName}</span>
                     <span className="bg-blue-500/20 text-blue-300 text-[10px] uppercase font-black px-2 py-0.5 rounded-md border border-blue-400/30">
                       {currentUser.role}
                     </span>
@@ -193,7 +178,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                   onClick={() => onNavigateTab('schedule')}
                   className="ml-auto bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition"
                 >
-                  <span>Launch Workspace</span>
+                  <span>Open Schedule</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -203,98 +188,26 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-800">
             <div className="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/50">
-              <div className="text-xl sm:text-2xl font-black text-amber-400">{stats?.totalAttendees || 1240}+</div>
+              <div className="text-xl sm:text-2xl font-black text-amber-400">{stats?.totalAttendees ?? 0}</div>
               <div className="text-[11px] text-slate-400 font-semibold">Registered Delegates</div>
             </div>
             <div className="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/50">
-              <div className="text-xl sm:text-2xl font-black text-blue-400">{stats?.totalSessions || 48}</div>
-              <div className="text-[11px] text-slate-400 font-semibold">Keynotes & Breakouts</div>
+              <div className="text-xl sm:text-2xl font-black text-blue-400">{stats?.totalSessions ?? 0}</div>
+              <div className="text-[11px] text-slate-400 font-semibold">Sessions</div>
             </div>
             <div className="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/50">
-              <div className="text-xl sm:text-2xl font-black text-emerald-400">{stats?.totalSpeakers || 32}</div>
-              <div className="text-[11px] text-slate-400 font-semibold">Global Keynote Speakers</div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-400">{stats?.totalSpeakers ?? 0}</div>
+              <div className="text-[11px] text-slate-400 font-semibold">Speakers</div>
             </div>
             <div className="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/50">
-              <div className="text-xl sm:text-2xl font-black text-indigo-400">WebRTC Hybrid</div>
-              <div className="text-[11px] text-slate-400 font-semibold">LiveKit Cloud Video</div>
+              <div className="text-xl sm:text-2xl font-black text-indigo-400">{stats?.checkedInCount ?? 0}</div>
+              <div className="text-[11px] text-slate-400 font-semibold">Checked In</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. DEMO PERSONA & ROLE SECURITY TEST BOX */}
-      <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 border border-blue-500/30 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-300 uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Full Role-Based Security Testing (RBAC)</span>
-            </div>
-            <h3 className="text-lg sm:text-xl font-black text-white mt-1">
-              Instantly Switch Test Personas to Verify Authorization Boundaries
-            </h3>
-            <p className="text-xs text-slate-300 max-w-2xl mt-0.5">
-              Notice how unauthenticated visitors only see the Landing Page, while registered Attendees receive schedule bookmarking, and Organizers unlock the full Organizer Control Panel!
-            </p>
-          </div>
-
-          <button
-            onClick={() => onOpenAuth('demo')}
-            className="bg-white hover:bg-slate-100 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shrink-0 transition"
-          >
-            Open Persona Selector
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-2">
-          <button
-            onClick={() => onQuickDemoLogin('attendee')}
-            className="bg-slate-800/80 hover:bg-emerald-600/30 border border-emerald-500/40 p-3 rounded-2xl text-left transition group"
-          >
-            <div className="text-[10px] font-black uppercase text-emerald-400">Attendee</div>
-            <div className="text-xs font-bold text-white group-hover:text-emerald-200">Amina Mugisha</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">🔒 No Organizer Tab</div>
-          </button>
-
-          <button
-            onClick={() => onQuickDemoLogin('speaker')}
-            className="bg-slate-800/80 hover:bg-blue-600/30 border border-blue-500/40 p-3 rounded-2xl text-left transition group"
-          >
-            <div className="text-[10px] font-black uppercase text-blue-400">Speaker</div>
-            <div className="text-xs font-bold text-white group-hover:text-blue-200">Dr. Jean-Paul</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">🎤 Speaker Studio</div>
-          </button>
-
-          <button
-            onClick={() => onQuickDemoLogin('moderator')}
-            className="bg-slate-800/80 hover:bg-amber-600/30 border border-amber-500/40 p-3 rounded-2xl text-left transition group"
-          >
-            <div className="text-[10px] font-black uppercase text-amber-400">Moderator</div>
-            <div className="text-xs font-bold text-white group-hover:text-amber-200">Claudine Uwase</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">🎛️ Q&A / Poll Controls</div>
-          </button>
-
-          <button
-            onClick={() => onQuickDemoLogin('organizer')}
-            className="bg-slate-800/80 hover:bg-purple-600/30 border border-purple-500/40 p-3 rounded-2xl text-left transition group"
-          >
-            <div className="text-[10px] font-black uppercase text-purple-400">Organizer (RCB)</div>
-            <div className="text-xs font-bold text-white group-hover:text-purple-200">Emmanuel N.</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">⚡ Full Organizer Tab</div>
-          </button>
-
-          <button
-            onClick={() => onQuickDemoLogin('administrator')}
-            className="bg-slate-800/80 hover:bg-rose-600/30 border border-rose-500/40 p-3 rounded-2xl text-left transition group"
-          >
-            <div className="text-[10px] font-black uppercase text-rose-400">Administrator</div>
-            <div className="text-xs font-bold text-white group-hover:text-rose-200">Grace Ingabire</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">⚙️ Platform Controls</div>
-          </button>
-        </div>
-      </div>
-
-      {/* 3. ABOUT US & MISSION SECTION */}
+      {/* ABOUT US & MISSION SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         <div className="space-y-4">
           <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">

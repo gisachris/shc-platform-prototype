@@ -8,13 +8,15 @@ interface AddSessionModalProps {
   onClose: () => void;
   speakers: Speaker[];
   onSessionCreated: () => void;
+  conferenceId?: string;
 }
 
 export const AddSessionModal: React.FC<AddSessionModalProps> = ({
   isOpen,
   onClose,
   speakers,
-  onSessionCreated
+  onSessionCreated,
+  conferenceId
 }) => {
   if (!isOpen) return null;
 
@@ -64,7 +66,8 @@ export const AddSessionModal: React.FC<AddSessionModalProps> = ({
         capacity,
         level,
         speakerIds: selectedSpeakerIds,
-        tags: [track.split(' ')[0], level]
+        tags: [track.split(' ')[0], level],
+        conferenceId,
       });
 
       onSessionCreated();

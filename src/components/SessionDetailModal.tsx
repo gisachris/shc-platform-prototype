@@ -50,8 +50,6 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
   const [poll, setPoll] = useState<SessionPoll | null>(null);
   const [votedOptionId, setVotedOptionId] = useState<string | null>(null);
   const [isSubmittingQ, setIsSubmittingQ] = useState(false);
-  const [summary, setSummary] = useState<string>('');
-  const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
 
   const isSaved = savedSessionIds.includes(session.id);
   const sessionSpeakers = speakers.filter(spk => session.speakerIds.includes(spk.id));
@@ -72,8 +70,8 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
     try {
       const res = await api.submitQA({
         sessionId: session.id,
-        authorName: authorName.trim() || 'TechCon Attendee',
-        text: newQuestionText.trim()
+        text: newQuestionText.trim(),
+        authorCompany: currentUser?.company,
       });
       if (res.success) {
         setQuestions([res.question, ...questions]);
@@ -107,25 +105,6 @@ export const SessionDetailModal: React.FC<SessionDetailModalProps> = ({
       }
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  const handleGenerateAISummary = async () => {
-    setIsSummarizing(true);
-    try {
-      const res = await api.askAIAssistant({
-        prompt: `Provide a 3-bullet executive summary and key technical takeaways for this conference session:
-Title: "${session.title}"
-Abstract: "${session.description}"
-Track: ${session.track}
-Level: ${session.level}`
-      });
-      setSummary(res.reply);
-    } catch (err) {
-      console.error(err);
-      setSummary('Failed to generate summary.');
-    } finally {
-      setIsSummarizing(false);
     }
   };
 
@@ -237,32 +216,6 @@ Level: ${session.level}`
                 <p className="text-sm text-slate-800 leading-relaxed bg-gray-50 p-4 rounded-2xl border border-gray-200">
                   {session.description}
                 </p>
-              </div>
-
-              {/* AI Key Takeaway Generator */}
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>AI Executive Summary & Takeaways</span>
-                  </div>
-
-                  {!summary && (
-                    <button
-                      onClick={handleGenerateAISummary}
-                      disabled={isSummarizing}
-                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 disabled:opacity-50 shadow-xs"
-                    >
-                      {isSummarizing ? 'Generating...' : 'Generate AI Summary'}
-                    </button>
-                  )}
-                </div>
-
-                {summary && (
-                  <div className="text-xs text-slate-800 leading-relaxed bg-white p-3 rounded-xl border border-gray-200 whitespace-pre-wrap">
-                    {summary}
-                  </div>
-                )}
               </div>
 
               {/* Prerequisites */}

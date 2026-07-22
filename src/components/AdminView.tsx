@@ -30,6 +30,7 @@ interface AdminViewProps {
   attendees: Attendee[];
   onRefreshData: () => void;
   onOpenAddSessionModal: () => void;
+  conferenceId?: string;
 }
 
 export const AdminView: React.FC<AdminViewProps> = ({
@@ -38,7 +39,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   speakers,
   attendees,
   onRefreshData,
-  onOpenAddSessionModal
+  onOpenAddSessionModal,
+  conferenceId,
 }) => {
   const [activeAdminSubTab, setActiveAdminSubTab] = useState<'overview' | 'audit' | 'settings'>('overview');
   const [scanTicketId, setScanTicketId] = useState('');
@@ -46,11 +48,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [settings, setSettings] = useState<SystemSettings>({
     autoApproveRegistration: true,
-    livekitServerUrl: 'wss://demo.livekit.cloud',
-    smtpConfigured: true,
-    emergencyHotline: '+250 788 313 131',
+    livekitServerUrl: '',
+    smtpConfigured: false,
+    emergencyHotline: '+250 788 000 000',
     allowPublicCFP: true,
-    defaultTimezone: 'CAT (Central Africa Time / Kigali GMT+2)'
+    defaultTimezone: 'CAT (Central Africa Time / Kigali GMT+2)',
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [dbStatus, setDbStatus] = useState<{
@@ -59,8 +61,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
     counts: { users: number; conferences: number; speakers: number; sessions: number; proposals: number };
     timestamp: string;
   } | null>(null);
-  const [isSeeding, setIsSeeding] = useState(false);
-  const [seedResult, setSeedResult] = useState<string | null>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [engagement, setEngagement] = useState<any>(null);
 
   const refreshDbStatus = async () => {
     try {
@@ -74,60 +76,30 @@ export const AdminView: React.FC<AdminViewProps> = ({
   useEffect(() => {
     api.getAuditLogs().then(setAuditLogs).catch(console.error);
     api.getSettings().then(setSettings).catch(console.error);
+    api.getStats(conferenceId).then(setStats).catch(console.error);
+    api.getEngagementAnalytics().then(setEngagement).catch(console.error);
     refreshDbStatus();
-  }, []);
+  }, [conferenceId]);
 
-  const handleSeedDatabase = async () => {
-    setIsSeeding(true);
-    setSeedResult(null);
-    try {
-      const res = await api.seedDatabase();
-      if (res.seeded) {
-        setSeedResult(`Database successfully seeded! ${JSON.stringify(res.counts)}`);
-      } else {
-        setSeedResult(`Seeding response: ${res.reason || res.error || 'Done'}`);
-      }
-      refreshDbStatus();
-      onRefreshData();
-    } catch (err: any) {
-      setSeedResult(`Seeding error: ${err.message || 'Failed to seed database'}`);
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-
-  // Stats calculation
   const totalRegistrations = attendees.length;
-  const checkedInCount = attendees.filter(a => a.isCheckedIn).length;
+  const checkedInCount = attendees.filter((a) => a.isCheckedIn).length;
 
   const handleSimulateScanCheckIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!scanTicketId.trim()) return;
-
-    const target = attendees.find(
-      a => a.ticketId.toLowerCase() === scanTicketId.trim().toLowerCase() ||
-           a.qrCodeData.toLowerCase().includes(scanTicketId.trim().toLowerCase())
-    );
-
-    if (!target) {
-      setScanMessage({ text: `No registrant found for ticket/code "${scanTicketId}"`, success: false });
-      return;
-    }
-
     try {
-      const res = await api.toggleCheckIn(target.id);
+      const res = await api.checkInByTicket(scanTicketId.trim());
       if (res.success) {
         setScanMessage({
-          text: `✓ Checked In ${res.attendee.fullName} (${res.attendee.company})! Status: ${res.attendee.isCheckedIn ? 'Checked In' : 'Pending'}`,
-          success: true
+          text: `Checked in ${res.attendee.fullName} (${res.attendee.ticketId})`,
+          success: true,
         });
+        setScanTicketId('');
         onRefreshData();
-        // Refresh audit logs
         api.getAuditLogs().then(setAuditLogs).catch(console.error);
       }
-    } catch (err) {
-      console.error(err);
-      setScanMessage({ text: 'Check-in failed.', success: false });
+    } catch (err: any) {
+      setScanMessage({ text: err.message || 'Check-in failed.', success: false });
     }
   };
 
@@ -155,21 +127,55 @@ export const AdminView: React.FC<AdminViewProps> = ({
   };
 
   const exportCSVReport = () => {
-    const headers = ["Ticket ID", "Full Name", "Email", "Company", "Ticket Tier", "Checked In", "Registered At"];
-    const rows = attendees.map(a => [
+    const headers = [
+      'Ticket ID',
+      'Full Name',
+      'Email',
+      'Company',
+      'Ticket Tier',
+      'Checked In',
+      'Registered At',
+    ];
+    const rows = attendees.map((a) => [
       a.ticketId,
-      `"${a.fullName}"`,
+      a.fullName,
       a.email,
-      `"${a.company}"`,
+      a.company,
       a.ticketTier,
-      a.isCheckedIn ? "YES" : "NO",
-      a.registeredAt
+      a.isCheckedIn ? 'Yes' : 'No',
+      a.registeredAt,
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `rwanda_conference_attendance_report.csv`);
+    const sessionHeaders = ['Session ID', 'Title', 'Track', 'Day', 'Room', 'Registered'];
+    const sessionRows = sessions.map((s) => [
+      s.id,
+      s.title,
+      s.track,
+      String(s.day),
+      s.room,
+      String(s.registeredCount),
+    ]);
+    const csv = [
+      '# Attendees',
+      headers.join(','),
+      ...rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')),
+      '',
+      '# Sessions',
+      sessionHeaders.join(','),
+      ...sessionRows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')),
+      '',
+      '# Summary',
+      `"Revenue estimate","${stats?.revenue ?? 0}"`,
+      `"Check-in rate","${stats?.checkInRate ?? 0}%"`,
+      `"CFP pending","${stats?.cfpPipeline?.pending ?? 0}"`,
+      `"Q&A questions","${engagement?.totalQuestions ?? 0}"`,
+      `"Poll votes","${engagement?.totalPollVotes ?? 0}"`,
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `shc_conference_report_${conferenceId || 'all'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -500,41 +506,24 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </button>
           </form>
 
-          {/* SUPABASE & SEEDING DATABASE INTEGRATION CARD */}
-          <div className="pt-6 border-t border-gray-100 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Database Storage & Dynamic Seeding Hub
-                </h4>
-                <p className="text-xs text-slate-500">
-                  {dbStatus?.databaseType || 'Persistent Cloud Storage Backend'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleSeedDatabase}
-                  disabled={isSeeding}
-                  className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm shadow-emerald-600/20"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isSeeding ? 'animate-spin' : ''}`} />
-                  <span>{isSeeding ? 'Seeding DB...' : 'Seed Database Tables'}</span>
-                </button>
-                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  PostgreSQL Ready
-                </span>
-              </div>
-            </div>
-
-            {seedResult && (
-              <div className="p-3 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-xl border border-slate-800 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{seedResult}</span>
-              </div>
-            )}
-
+          <div className="pt-6 border-t border-gray-100 space-y-3">
+            <h4 className="text-sm font-extrabold text-slate-900">Database Status</h4>
+            <p className="text-xs text-slate-500">
+              {dbStatus
+                ? `${dbStatus.databaseType} — users ${dbStatus.counts.users}, conferences ${dbStatus.counts.conferences}, sessions ${dbStatus.counts.sessions}`
+                : 'Loading database status…'}
+            </p>
+            <p className="text-[11px] text-slate-400">
+              Apply supabase/schema.sql then run npm run seed from the project root.
+            </p>
+            <button
+              type="button"
+              onClick={refreshDbStatus}
+              className="bg-gray-100 hover:bg-gray-200 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Refresh DB Status
+            </button>
             {dbStatus && (
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
                 <div className="bg-gray-50 border border-gray-200 p-2.5 rounded-xl">
@@ -553,74 +542,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   <div className="text-[10px] uppercase font-bold text-slate-500">Sessions</div>
                   <div className="text-sm font-black text-slate-900">{dbStatus.counts.sessions}</div>
                 </div>
-                <div className="bg-gray-50 border border-gray-200 p-2.5 rounded-xl col-span-2 sm:col-span-1">
+                <div className="bg-gray-50 border border-gray-200 p-2.5 rounded-xl">
                   <div className="text-[10px] uppercase font-bold text-slate-500">Proposals</div>
                   <div className="text-sm font-black text-slate-900">{dbStatus.counts.proposals}</div>
                 </div>
               </div>
             )}
-
-            <div className="bg-slate-900 text-slate-200 p-4 rounded-2xl text-xs space-y-3">
-              <div className="font-semibold text-slate-300">
-                Required Supabase Environment Variables in <code className="bg-slate-800 px-1.5 py-0.5 rounded text-amber-300">.env.example</code>:
-              </div>
-              <div className="bg-slate-950 p-3 rounded-xl font-mono text-[11px] text-emerald-400 space-y-1">
-                <div>SUPABASE_URL="https://your-project.supabase.co"</div>
-                <div>SUPABASE_ANON_KEY="your-supabase-anon-key"</div>
-                <div>SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"</div>
-                <div>VITE_SUPABASE_URL="https://your-project.supabase.co"</div>
-                <div>VITE_SUPABASE_ANON_KEY="your-supabase-anon-key"</div>
-              </div>
-
-              <div className="text-[11px] text-slate-400">
-                Run the following SQL snippet in your Supabase SQL Editor to provision tables:
-              </div>
-
-              <textarea
-                readOnly
-                rows={6}
-                value={`-- Supabase Database Tables Schema
-create extension if not exists "uuid-ossp";
-
-create table if not exists users (
-  id text primary key,
-  email text unique not null,
-  full_name text not null,
-  role text not null default 'attendee',
-  avatar text,
-  company text,
-  job_title text,
-  bio text,
-  created_at timestamp with time zone default timezone('utc'::text, now())
-);
-
-create table if not exists conferences (
-  id text primary key,
-  title text not null,
-  theme text,
-  venue_name text,
-  city text,
-  country text,
-  start_date text,
-  end_date text,
-  status text default 'upcoming'
-);
-
-create table if not exists sessions (
-  id text primary key,
-  title text not null,
-  abstract text,
-  track text,
-  level text,
-  room_name text,
-  speaker_ids text[],
-  start_time text,
-  end_time text,
-  day_number integer default 1
-);`}
-                className="w-full bg-slate-950 text-slate-300 font-mono text-[10px] p-3 rounded-xl border border-slate-800 focus:outline-none"
-              />
-            </div>
           </div>
         </div>
       )}

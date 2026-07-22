@@ -43,9 +43,8 @@ interface HeaderProps {
   isLiveSimulated: boolean;
   setIsLiveSimulated: (live: boolean) => void;
   currentUser: User | null;
-  onOpenAuth: (mode?: 'login' | 'register' | 'demo') => void;
+  onOpenAuth: (mode?: 'login' | 'register') => void;
   onLogout: () => void;
-  onQuickDemoLogin: (role: UserRole) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -57,7 +56,6 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onOpenAuth,
   onLogout,
-  onQuickDemoLogin
 }) => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
@@ -369,58 +367,13 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="text-[10px] text-slate-600">{currentUser.jobTitle} • {currentUser.company}</div>
                     </div>
 
-                    <div className="space-y-1">
-                      <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider px-2 pt-1">
-                        Quick Demo Persona Switch
-                      </div>
-                      <button
-                        onClick={() => { setIsUserMenuOpen(false); onQuickDemoLogin('attendee'); }}
-                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-emerald-50 text-slate-700 flex items-center justify-between"
-                      >
-                        <span>Attendee (Amina)</span>
-                        <span className="text-[9px] text-emerald-700 font-mono">attendee</span>
-                      </button>
-
-                      <button
-                        onClick={() => { setIsUserMenuOpen(false); onQuickDemoLogin('speaker'); }}
-                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-700 flex items-center justify-between"
-                      >
-                        <span>Speaker (Dr. Jean-Paul)</span>
-                        <span className="text-[9px] text-blue-700 font-mono">speaker</span>
-                      </button>
-
-                      <button
-                        onClick={() => { setIsUserMenuOpen(false); onQuickDemoLogin('moderator'); }}
-                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-amber-50 text-slate-700 flex items-center justify-between"
-                      >
-                        <span>Moderator (Claudine)</span>
-                        <span className="text-[9px] text-amber-700 font-mono">moderator</span>
-                      </button>
-
-                      <button
-                        onClick={() => { setIsUserMenuOpen(false); onQuickDemoLogin('organizer'); }}
-                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-purple-50 text-slate-700 flex items-center justify-between"
-                      >
-                        <span>Organizer (Emmanuel)</span>
-                        <span className="text-[9px] text-purple-700 font-mono">organizer</span>
-                      </button>
-
-                      <button
-                        onClick={() => { setIsUserMenuOpen(false); onQuickDemoLogin('administrator'); }}
-                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-rose-50 text-slate-700 flex items-center justify-between"
-                      >
-                        <span>Admin (Grace)</span>
-                        <span className="text-[9px] text-rose-700 font-mono">administrator</span>
-                      </button>
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-100">
+                    <div className="pt-1">
                       <button
                         onClick={() => { setIsUserMenuOpen(false); onLogout(); }}
                         className="w-full text-left px-2.5 py-2 rounded-xl text-rose-700 hover:bg-rose-50 font-bold flex items-center gap-2 transition"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        <span>Sign Out (Return to Guest)</span>
+                        <span>Sign Out</span>
                       </button>
                     </div>
                   </div>
@@ -430,19 +383,16 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => onOpenAuth('login')}
-                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Sign In</span>
                 </button>
-
                 <button
-                  onClick={() => onOpenAuth('demo')}
-                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black px-3 py-2 rounded-xl flex items-center gap-1 transition shadow-sm"
-                  title="Select Demo Personas"
+                  onClick={() => onOpenAuth('register')}
+                  className="bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-xs font-extrabold px-3 py-2 rounded-xl transition shadow-sm"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-                  <span className="hidden md:inline">Demo Personas</span>
+                  Register
                 </button>
               </div>
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { User, Session, Conference, Speaker, Attendee, DirectMessage } from '../types';
 import { api } from '../services/api';
 import { 
@@ -32,7 +32,7 @@ interface UserDashboardViewProps {
   attendees: Attendee[];
   onNavigateTab: (tab: any) => void;
   onOpenSessionModal: (session: Session) => void;
-  onOpenLiveKitRoom: (roomName: string, participantName: string, isSpeaker?: boolean) => void;
+  onOpenLiveKitRoom: (session: Session) => void;
 }
 
 export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
@@ -58,6 +58,15 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
   const [messageText, setMessageText] = useState('');
   const [isSendingMsg, setIsSendingMsg] = useState(false);
   const [msgSentSuccess, setMsgSentSuccess] = useState(false);
+  const [suggestedMatches, setSuggestedMatches] = useState<
+    Array<{ attendee: any; score: number; sharedInterests: string[] }>
+  >([]);
+
+  useEffect(() => {
+    api.getNetworkingMatches()
+      .then((res) => setSuggestedMatches(res.matches || []))
+      .catch(() => setSuggestedMatches([]));
+  }, [currentUser.id]);
 
   // Filter networking opt-in delegates
   const networkingDelegates = useMemo(() => {
@@ -92,8 +101,6 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
       await api.sendMessage({
         receiverId: activeMessageAttendee.id,
         text: messageText.trim(),
-        senderName: currentUser.fullName,
-        senderAvatar: currentUser.avatarUrl
       });
       setMsgSentSuccess(true);
       setMessageText('');
@@ -262,7 +269,7 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onOpenLiveKitRoom(session.title, currentUser.fullName);
+                        onOpenLiveKitRoom(session);
                       }}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition shrink-0"
                     >
@@ -323,10 +330,51 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
                 <Users className="w-5 h-5 text-purple-600" />
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900">Peer Networking Directory</h3>
-                  <p className="text-[11px] text-slate-500">Connect with fellow delegates & schedule coffee chats</p>
+                  <p className="text-[11px] text-slate-500">Interest-based matches and delegate directory</p>
                 </div>
               </div>
             </div>
+
+            {suggestedMatches.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Suggested matches</div>
+                {suggestedMatches.slice(0, 5).map((m) => (
+                  <div key={m.attendee.id} className="flex items-center justify-between gap-2 bg-purple-50 border border-purple-100 rounded-xl p-2.5">
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-slate-900 truncate">{m.attendee.fullName}</div>
+                      <div className="text-[10px] text-slate-500 truncate">
+                        {m.sharedInterests.join(', ')} · score {m.score}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() =>
+                        setActiveMessageAttendee({
+                          id: m.attendee.id,
+                          ticketId: '',
+                          ticketTier: 'general',
+                          fullName: m.attendee.fullName,
+                          email: m.attendee.email,
+                          company: m.attendee.company,
+                          jobTitle: m.attendee.jobTitle,
+                          interests: m.attendee.interests,
+                          dietaryPreference: 'None',
+                          tshirtSize: 'L',
+                          isNetworkingOptIn: true,
+                          isCheckedIn: false,
+                          registeredAt: '',
+                          qrCodeData: '',
+                          avatar: m.attendee.avatar || '',
+                          bio: m.attendee.bio || '',
+                        })
+                      }
+                      className="text-[10px] font-bold text-purple-700 hover:underline shrink-0"
+                    >
+                      Message
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Directory Filters */}
             <div className="space-y-2">
@@ -483,7 +531,7 @@ export const UserDashboardView: React.FC<UserDashboardViewProps> = ({
                   <textarea
                     rows={4}
                     required
-                    placeholder={`Hi ${activeMessageAttendee.fullName.split(' ')[0]}, I noticed your work in ${activeMessageAttendee.interests[0] || 'tech'} and would love to connect during TechCon!`}
+                    placeholder={`Hi ${activeMessageAttendee.fullName.split(' ')[0]}, I noticed your work in ${activeMessageAttendee.interests[0] || 'tech'} and would love to connect during the conference.`}
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-900"

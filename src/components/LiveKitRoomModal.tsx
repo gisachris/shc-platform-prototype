@@ -411,7 +411,7 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  const roomName = `techcon-session-${session.id}`;
+  const roomName = `session-${session.id}`;
 
   // 1. Refresh available hardware devices
   const refreshDevices = async () => {
@@ -576,9 +576,9 @@ export const LiveKitRoomModal: React.FC<LiveKitRoomModalProps> = ({
 
     try {
       const res = await api.getLiveKitToken({
+        sessionId: session.id,
         roomName,
         participantName: userName.trim(),
-        isSpeaker
       });
 
       setToken(res.token);

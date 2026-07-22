@@ -25,9 +25,10 @@ import {
 
 interface CFPViewProps {
   currentUser?: User | null;
+  conferenceId?: string;
 }
 
-export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
+export const CFPView: React.FC<CFPViewProps> = ({ currentUser, conferenceId }) => {
   const isOrganizer = Boolean(currentUser && ['organizer', 'administrator', 'super_admin'].includes(currentUser.role));
   const [proposals, setProposals] = useState<CFPProposal[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +38,7 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
   const [selectedProposal, setSelectedProposal] = useState<CFPProposal | null>(null);
   const [reviewerNotes, setReviewerNotes] = useState('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'under_review' | 'approved' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all');
 
   // Form State
   const [speakerName, setSpeakerName] = useState('');
@@ -58,7 +59,7 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
     return proposals.filter(p => p.status === statusFilter);
   }, [proposals, statusFilter]);
 
-  const handleStatusChange = async (proposalId: string, newStatus: 'approved' | 'rejected' | 'under_review') => {
+  const handleStatusChange = async (proposalId: string, newStatus: 'pending' | 'accepted' | 'rejected') => {
     setIsUpdatingStatus(true);
     try {
       const res = await api.updateCFPStatus(proposalId, newStatus);
@@ -89,13 +90,22 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
         title: title.trim(),
         abstract: abstract.trim(),
         targetTrack,
-        level
+        level,
+        conferenceId,
       });
 
       if (res.success) {
         setSubmittedProposal(res.proposal);
-        setProposals([res.proposal, ...proposals]);
-        // Reset form
+        if (isOrganizer) {
+          setProposals([res.proposal, ...proposals]);
+        }
+        if (res.aiStatus !== 'ok') {
+          alert(
+            res.aiStatus === 'unavailable'
+              ? 'Proposal saved. AI review is unavailable (GEMINI_API_KEY / model). Organizers can review manually.'
+              : `Proposal saved. AI review failed: ${res.aiError || 'unknown error'}. Organizers can review manually.`
+          );
+        }
         setTitle('');
         setAbstract('');
       }
@@ -294,16 +304,16 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
               All ({proposals.length})
             </button>
             <button
-              onClick={() => setStatusFilter('under_review')}
-              className={`px-2.5 py-1 rounded-lg transition ${statusFilter === 'under_review' ? 'bg-white text-amber-800 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'}`}
+              onClick={() => setStatusFilter('pending')}
+              className={`px-2.5 py-1 rounded-lg transition ${statusFilter === 'pending' ? 'bg-white text-amber-800 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'}`}
             >
-              Pending ({proposals.filter(p => p.status === 'under_review').length})
+              Pending ({proposals.filter(p => p.status === 'pending').length})
             </button>
             <button
-              onClick={() => setStatusFilter('approved')}
-              className={`px-2.5 py-1 rounded-lg transition ${statusFilter === 'approved' ? 'bg-white text-emerald-800 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'}`}
+              onClick={() => setStatusFilter('accepted')}
+              className={`px-2.5 py-1 rounded-lg transition ${statusFilter === 'accepted' ? 'bg-white text-emerald-800 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'}`}
             >
-              Approved ({proposals.filter(p => p.status === 'approved').length})
+              Accepted ({proposals.filter(p => p.status === 'accepted').length})
             </button>
             <button
               onClick={() => setStatusFilter('rejected')}
@@ -328,7 +338,7 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-extrabold text-blue-600">{prop.targetTrack}</span>
                     <span className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-black border ${
-                      prop.status === 'approved'
+                      prop.status === 'accepted'
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                         : prop.status === 'rejected'
                         ? 'bg-rose-50 text-rose-800 border-rose-200'
@@ -370,7 +380,7 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
                     Level: {selectedProposal.level}
                   </span>
                   <span className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-black border ${
-                    selectedProposal.status === 'approved'
+                    selectedProposal.status === 'accepted'
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                       : selectedProposal.status === 'rejected'
                       ? 'bg-rose-50 text-rose-800 border-rose-200'
@@ -447,12 +457,12 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
 
                 <div className="flex items-center gap-2 pt-1">
                   <button
-                    disabled={isUpdatingStatus || selectedProposal.status === 'approved'}
-                    onClick={() => handleStatusChange(selectedProposal.id, 'approved')}
+                    disabled={isUpdatingStatus || selectedProposal.status === 'accepted'}
+                    onClick={() => handleStatusChange(selectedProposal.id, 'accepted')}
                     className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition disabled:opacity-50"
                   >
                     <ThumbsUp className="w-4 h-4" />
-                    <span>Approve Proposal</span>
+                    <span>Accept Proposal</span>
                   </button>
 
                   <button
@@ -465,8 +475,8 @@ export const CFPView: React.FC<CFPViewProps> = ({ currentUser }) => {
                   </button>
 
                   <button
-                    disabled={isUpdatingStatus || selectedProposal.status === 'under_review'}
-                    onClick={() => handleStatusChange(selectedProposal.id, 'under_review')}
+                    disabled={isUpdatingStatus || selectedProposal.status === 'pending'}
+                    onClick={() => handleStatusChange(selectedProposal.id, 'pending')}
                     className="bg-gray-200 hover:bg-gray-300 text-slate-800 font-bold py-2.5 px-3 rounded-xl text-xs transition"
                   >
                     Set Under Review
