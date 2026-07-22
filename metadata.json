@@ -1,0 +1,9 @@
+{
+  "name": "SHC platform",
+  "description": "Smart Hybrid Conference Management Platform - Rwanda Convention Bureau. Integrated physical & virtual conference management, LiveKit WebRTC video rooms, QR check-in, networking, and Rwanda tourism.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
