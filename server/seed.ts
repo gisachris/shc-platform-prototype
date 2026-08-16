@@ -1,3 +1,11 @@
+/**
+ * Seed script for populating the platform with demo data.
+ *
+ * This file inserts sample users, conferences, speakers, sessions, attendees, CFPs, and
+ * tourism records into Supabase. It is connected to src/data/initialData.ts and is used to
+ * bootstrap the app for demos and local development.
+ */
+
 import 'dotenv/config';
 import { getDb } from './db';
 import { hashPassword } from './auth';

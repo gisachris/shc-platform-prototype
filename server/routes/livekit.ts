@@ -1,3 +1,11 @@
+/**
+ * LiveKit token generation for browser-based hybrid sessions.
+ *
+ * This router issues short-lived tokens for joining LiveKit rooms and validates who is allowed
+ * to publish audio/video. It connects the conference session experience to the live video stack
+ * used by LiveKitRoomModal in the client.
+ */
+
 import { Router } from 'express';
 import { AccessToken } from 'livekit-server-sdk';
 import { config, livekitConfigured } from '../config';

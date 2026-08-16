@@ -1,3 +1,10 @@
+/**
+ * Tests for the server-side mapper and ticket ID helpers.
+ *
+ * This file asserts that the database mapping logic and SHC ticket format operate as expected.
+ * It connects to server/mappers.ts and the auth helpers used during registration and attendee flows.
+ */
+
 import { describe, it, expect } from 'vitest';
 import { mapSession, mapAttendee } from './mappers';
 

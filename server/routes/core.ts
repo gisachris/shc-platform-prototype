@@ -1,3 +1,11 @@
+/**
+ * Core API routes for auth, user management, and platform health.
+ *
+ * This router handles login, registration, password reset, database status checks, and user
+ * account flows. It connects to the auth utilities, email service, DB layer, and the frontend
+ * through the shared API client.
+ */
+
 import crypto from 'crypto';
 import { Router } from 'express';
 import { getDb } from '../db';

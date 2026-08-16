@@ -1,3 +1,11 @@
+/**
+ * Frontend API client for the Express backend.
+ *
+ * This file centralizes all fetch calls used by the client to authenticate users, manage
+ * sessions, handle conferences, check in attendees, and access engagement features. It connects
+ * the React UI to the server routes in the Express app.
+ */
+
 import { 
   Session, 
   Speaker, 
@@ -12,7 +20,7 @@ import {
   DirectMessage, 
   SystemSettings,
   User,
-} from '../types';
+} from '../shared/types';
 
 const AUTH_TOKEN_KEY = 'shc_auth_token';
 

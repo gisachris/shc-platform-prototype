@@ -1,3 +1,11 @@
+/**
+ * Platform-level API routes for conferences, tourism, notifications, and settings.
+ *
+ * This router exposes the public and organizer-facing data used by the app's conference directory,
+ * tourism guide, notifications center, and system settings screens. It connects to the Supabase
+ * database and the core frontend views in the src/components folder.
+ */
+
 import { Router } from 'express';
 import { getDb } from '../db';
 import { authRequired, getAuthUser, isOrganizer, requireOrganizer, writeAudit } from '../auth';

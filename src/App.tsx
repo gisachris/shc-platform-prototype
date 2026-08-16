@@ -1,20 +1,28 @@
+/**
+ * Root application controller for the SHC frontend.
+ *
+ * This is the central React component that manages current user state, navigation tabs,
+ * conference selection, modal windows, and data refresh. It connects the entire app together,
+ * rendering the public landing screen and the role-specific dashboard views.
+ */
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header, NavTab } from './components/Header';
-import { LandingPageView } from './components/LandingPageView';
-import { UserDashboardView } from './components/UserDashboardView';
-import { ScheduleView } from './components/ScheduleView';
-import { SessionDetailModal } from './components/SessionDetailModal';
-import { SpeakersView } from './components/SpeakersView';
-import { RegistrationView } from './components/RegistrationView';
-import { CFPView } from './components/CFPView';
-import { AdminView } from './components/AdminView';
+import { LandingPageView } from './pages/LandingPageView';
+import { UserDashboardView } from './pages/UserDashboardView';
+import { ScheduleView } from './pages/ScheduleView';
+import { SessionDetailModal } from './pages/SessionDetailModal';
+import { SpeakersView } from './pages/SpeakersView';
+import { RegistrationView } from './pages/RegistrationView';
+import { CFPView } from './pages/CFPView';
+import { AdminView } from './pages/AdminView';
 import { AddSessionModal } from './components/AddSessionModal';
 import { LiveKitRoomModal } from './components/LiveKitRoomModal';
-import { TourismView } from './components/TourismView';
-import { ConferencesView } from './components/ConferencesView';
+import { TourismView } from './pages/TourismView';
+import { ConferencesView } from './pages/ConferencesView';
 import { AuthModal } from './components/AuthModal';
 
-import { Session, Speaker, Attendee, User, Conference } from './types';
+import { Session, Speaker, Attendee, User, Conference } from './shared/types';
 import { api } from './services/api';
 
 const ORGANIZER_ROLES = ['organizer', 'administrator', 'super_admin'];

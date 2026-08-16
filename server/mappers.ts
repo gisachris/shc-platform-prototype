@@ -1,3 +1,11 @@
+/**
+ * Database-to-frontend mapping layer.
+ *
+ * This file converts snake_case database rows into the camelCase TypeScript objects used
+ * by the frontend. It connects Supabase records to the UI models in src/types.ts, so the
+ * client can consume conference, speaker, attendee, and session data consistently.
+ */
+
 import {
   Session,
   Speaker,

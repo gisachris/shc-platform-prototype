@@ -1,5 +1,12 @@
+/**
+ * Personalized dashboard for signed-in attendees and delegates.
+ *
+ * This screen displays saved sessions, quick stats, networking suggestions, and the attendee
+ * dashboard experience. It is connected to App.tsx and uses the shared API client for data.
+ */
+
 import React, { useState, useMemo, useEffect } from 'react';
-import { User, Session, Conference, Speaker, Attendee, DirectMessage } from '../types';
+import { User, Session, Conference, Speaker, Attendee, DirectMessage } from '../shared/types';
 import { api } from '../services/api';
 import { 
   Building2, 

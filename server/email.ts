@@ -1,3 +1,11 @@
+/**
+ * EmailJS integration for welcome and reset emails.
+ *
+ * This file sends automated emails for new registrations and password resets using the
+ * configured EmailJS templates. It is wired into the auth routes in server/routes/core.ts
+ * and helps complete the user signup and account recovery flow.
+ */
+
 import { config } from './config';
 
 function emailjsEnv() {

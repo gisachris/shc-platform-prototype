@@ -1,3 +1,10 @@
+/**
+ * Vite TypeScript environment declarations.
+ *
+ * This file provides typing for Vite environment variables used by the frontend. It helps keep
+ * the browser-side config safe while the true server configuration lives in the backend.
+ */
+
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {

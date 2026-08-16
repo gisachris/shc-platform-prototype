@@ -1,3 +1,11 @@
+/**
+ * Gemini-powered CFP review service.
+ *
+ * This file sends speaker proposals to Google Gemini for automatic quality assessment.
+ * It is connected to the CFP submission route in server/routes/engagement.ts and supports
+ * organizer review with AI-assisted scoring when API credentials are configured.
+ */
+
 import { GoogleGenAI, Type } from '@google/genai';
 import { config } from './config';
 import { SessionTrack } from '../src/types';

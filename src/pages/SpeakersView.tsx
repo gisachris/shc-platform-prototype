@@ -1,5 +1,12 @@
+/**
+ * Speaker directory and public speaker profile browser.
+ *
+ * This component searches and filters speaker profiles and shows each speaker’s sessions. It
+ * connects to the speaker API and the session detail views used in the main app.
+ */
+
 import React, { useState, useMemo } from 'react';
-import { Speaker, Session } from '../types';
+import { Speaker, Session } from '../shared/types';
 import { 
   Search, 
   Mic, 

@@ -1,3 +1,11 @@
+/**
+ * Authentication and authorization utilities for the SHC platform.
+ *
+ * This module handles password hashing, JWT signing and verification, protected route
+ * middleware, organizer checks, and audit-event writes. It connects directly to the
+ * database layer and is used by API routes for login, registration, and protected admin actions.
+ */
+
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';

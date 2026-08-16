@@ -1,3 +1,11 @@
+/**
+ * Demo seed dataset for the SHC platform.
+ *
+ * This file contains the default conference, speaker, session, tourism, and system records used
+ * to populate the app in development and in the seed script. It connects to server/seed.ts and
+ * the front-end screens that render example platform data.
+ */
+
 import { 
   Session, 
   Speaker, 
@@ -13,7 +21,7 @@ import {
   DirectMessage,
   SystemSettings,
   User
-} from '../types';
+} from '../shared/types';
 
 export const TICKET_TIERS: TicketTier[] = [
   {
@@ -775,8 +783,8 @@ export const INITIAL_USERS: (User & { passwordHash?: string })[] = [
   },
   {
     id: 'user-admin',
-    email: 'admin@kigali2026.rw',
-    fullName: 'Grace Ingabire',
+    email: 'umutwarenicolas@gmail.com',
+    fullName: 'umutware nicolas',
     role: 'administrator',
     company: 'Ministry of ICT & Innovation',
     jobTitle: 'Platform Administrator',

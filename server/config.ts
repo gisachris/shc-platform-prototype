@@ -1,3 +1,12 @@
+/**
+ * SHC Platform server configuration helper.
+ *
+ * This file loads environment variables and validates the runtime setup required by the
+ * app: JWT secrets, Supabase URLs, LiveKit credentials, and Gemini configuration.
+ * It is connected to nearly every backend module because route handlers, auth utilities,
+ * and the main Express server all read its config values before starting work.
+ */
+
 import 'dotenv/config';
 
 function required(name: string, optional = false): string {

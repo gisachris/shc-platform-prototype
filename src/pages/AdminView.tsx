@@ -1,5 +1,12 @@
+/**
+ * Organizer console for managing the platform.
+ *
+ * This view shows attendance, check-ins, CSV exports, settings, and audit logs for conference
+ * organizers. It connects to the admin-only API endpoints and the broader conference data model.
+ */
+
 import React, { useState, useEffect } from 'react';
-import { Session, Speaker, Attendee, AuditLogEntry, SystemSettings, User } from '../types';
+import { Session, Speaker, Attendee, AuditLogEntry, SystemSettings, User } from '../shared/types';
 import { api } from '../services/api';
 import { 
   ShieldAlert, 

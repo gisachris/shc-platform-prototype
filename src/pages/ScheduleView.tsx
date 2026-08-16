@@ -1,3 +1,11 @@
+/**
+ * Conference schedule and session browser.
+ *
+ * This view filters sessions by day, track, and level, supports saved-agenda tracking, and lets
+ * users open session details. It connects to the session API and the SessionDetailModal for deep
+ * session views.
+ */
+
 import React, { useState, useMemo } from 'react';
 import { 
   Session, 
@@ -5,7 +13,7 @@ import {
   SessionTrack, 
   SessionLevel,
   User 
-} from '../types';
+} from '../shared/types';
 import { 
   Calendar, 
   Search, 

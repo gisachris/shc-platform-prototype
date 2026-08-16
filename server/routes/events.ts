@@ -1,3 +1,11 @@
+/**
+ * Event and registration API routes.
+ *
+ * This router handles sessions, speakers, attendees, and check-in logic for the conference.
+ * It is one of the main connectors between the front-end scheduling and admin screens and the
+ * Supabase database.
+ */
+
 import { Router } from 'express';
 import { getDb } from '../db';
 import { authRequired, getAuthUser, isOrganizer, requireOrganizer, writeAudit } from '../auth';

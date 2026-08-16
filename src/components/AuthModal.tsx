@@ -1,5 +1,12 @@
+/**
+ * Authentication modal for sign-in, registration, and password reset.
+ *
+ * This component manages the auth flow used by the public app and supports reset-token links.
+ * It connects to the backend auth routes through the shared API client.
+ */
+
 import React, { useState, useEffect } from 'react';
-import { User } from '../types';
+import { User } from '../shared/types';
 import { api } from '../services/api';
 import { X, LogIn, UserPlus, Key, AlertCircle, Mail } from 'lucide-react';
 

@@ -1,5 +1,12 @@
+/**
+ * Public marketing and onboarding screen for visitors.
+ *
+ * This view presents the SHC landing page, highlights conferences, shows stats, and offers
+ * sign-in/register actions. It is connected to App.tsx and acts as the entry point for guests.
+ */
+
 import React, { useState } from 'react';
-import { Conference, Speaker } from '../types';
+import { Conference, Speaker } from '../shared/types';
 import { 
   Sparkles, 
   Video, 

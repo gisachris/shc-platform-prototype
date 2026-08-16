@@ -1,3 +1,10 @@
+/**
+ * Live video room modal for hybrid conference sessions.
+ *
+ * This component opens a LiveKit room with media controls, device selection, and screen sharing.
+ * It connects to the LiveKit token API and the session detail flow used during live events.
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import '@livekit/components-styles';
 import { 
@@ -12,7 +19,7 @@ import {
   useConnectionState
 } from '@livekit/components-react';
 import { Track, RoomEvent } from 'livekit-client';
-import { Session, Speaker } from '../types';
+import { Session, Speaker } from '../shared/types';
 import { api } from '../services/api';
 import { 
   Video, 

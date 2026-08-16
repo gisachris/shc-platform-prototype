@@ -1,5 +1,12 @@
+/**
+ * Call for Papers submission and review interface.
+ *
+ * This view lets speakers submit a proposal and lets organizers review the full CFP pipeline.
+ * It connects to the CFP routes in the backend and to the Gemini AI review service when enabled.
+ */
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { CFPProposal, SessionTrack, SessionLevel, User } from '../types';
+import { CFPProposal, SessionTrack, SessionLevel, User } from '../shared/types';
 import { api } from '../services/api';
 import { 
   FileText, 

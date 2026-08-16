@@ -1,5 +1,12 @@
+/**
+ * Detailed modal for an individual session.
+ *
+ * This component shows abstract, speakers, live Q&A, and polls for one session. It connects to
+ * the session API, speaker profiles, and the LiveKit room flow when a user joins a live stream.
+ */
+
 import React, { useState, useEffect } from 'react';
-import { Session, Speaker, QAQuestion, SessionPoll, User } from '../types';
+import { Session, Speaker, QAQuestion, SessionPoll, User } from '../shared/types';
 import { api } from '../services/api';
 import { 
   X, 

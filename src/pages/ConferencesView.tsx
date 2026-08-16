@@ -1,5 +1,12 @@
+/**
+ * Conference directory and creation screen.
+ *
+ * This component lists published conferences and allows organizers to create new ones. It connects
+ * to the conference API and sets the active conference context across the app.
+ */
+
 import React, { useState, useEffect } from 'react';
-import { Conference, User } from '../types';
+import { Conference, User } from '../shared/types';
 import { api } from '../services/api';
 import { 
   Building2, 

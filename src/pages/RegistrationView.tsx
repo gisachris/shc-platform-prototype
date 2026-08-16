@@ -1,5 +1,12 @@
+/**
+ * Delegate registration form and generated pass experience.
+ *
+ * This page collects user details, pass type, interests, and conference selection before creating
+ * an attendee record. It connects to the registration API and updates the app state after success.
+ */
+
 import React, { useState, useEffect } from 'react';
-import { Attendee, Conference } from '../types';
+import { Attendee, Conference } from '../shared/types';
 import { api } from '../services/api';
 import { 
   Ticket, 

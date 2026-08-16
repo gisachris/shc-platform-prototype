@@ -1,7 +1,11 @@
 /**
- * @deprecated Prefer server-side EmailJS via /api/auth/register and /api/auth/forgot-password.
- * Kept only for isConfigured() checks in the UI if needed.
+ * Lightweight frontend helper for EmailJS configuration checks.
+ *
+ * This file is a UI-facing convenience for detecting whether EmailJS is configured in the
+ * browser environment. It is kept as a compatibility helper and is connected to the client-side
+ * email experience, while the actual sending logic lives on the server.
  */
+
 export const emailService = {
   isConfigured(): boolean {
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;

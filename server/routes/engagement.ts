@@ -1,3 +1,11 @@
+/**
+ * Engagement routes for live Q&A, polling, and CFP review.
+ *
+ * This file powers attendee participation features such as session questions, upvotes, polls,
+ * and proposal submissions. It connects to the Gemini reviewer and to the frontend engagement
+ * screens used during live sessions and CFP submission.
+ */
+
 import { Router } from 'express';
 import { getDb } from '../db';
 import { authOptional, authRequired, getAuthUser, requireOrganizer, writeAudit } from '../auth';

@@ -1,3 +1,11 @@
+/**
+ * Shared Supabase database client factory.
+ *
+ * This file creates and caches the single Postgres client used throughout the server.
+ * It connects the app to Supabase for authentication, conference data, attendee records,
+ * Q&A, and all other persisted platform state.
+ */
+
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { config, supabaseConfigured } from './config';
 

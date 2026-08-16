@@ -1,3 +1,11 @@
+/**
+ * Global application header and navigation shell.
+ *
+ * This component renders the brand bar, role-based tabs, notifications, and user menu. It is
+ * connected to App.tsx and helps drive navigation across the conference, schedule, speakers,
+ * registration, and organizer views.
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar, 
@@ -23,7 +31,7 @@ import {
   ShieldCheck,
   Sliders
 } from 'lucide-react';
-import { AppNotification, User, UserRole } from '../types';
+import { AppNotification, User, UserRole } from '../shared/types';
 import { api } from '../services/api';
 
 export type NavTab = 

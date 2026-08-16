@@ -1,5 +1,12 @@
+/**
+ * Delegate tourism and destination guide.
+ *
+ * This view presents Rwanda travel suggestions, accommodation, dining, transport, and emergency
+ * options for visitors. It connects to the tourism API and helps support the delegate experience.
+ */
+
 import React, { useState, useEffect } from 'react';
-import { TourismItem, TourismCategory } from '../types';
+import { TourismItem, TourismCategory } from '../shared/types';
 import { api } from '../services/api';
 import { 
   MapPin, 

@@ -1,5 +1,12 @@
+/**
+ * Organizer modal for creating a new session.
+ *
+ * This form adds a session record for a selected conference and is used by the schedule view and
+ * admin console. It connects to the session creation endpoint in the API layer.
+ */
+
 import React, { useState } from 'react';
-import { Session, SessionTrack, SessionLevel, Speaker } from '../types';
+import { Session, SessionTrack, SessionLevel, Speaker } from '../shared/types';
 import { api } from '../services/api';
 import { X, Calendar, Plus } from 'lucide-react';
 

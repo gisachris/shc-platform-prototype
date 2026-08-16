@@ -1,1 +1,8 @@
+/**
+ * Global styling entry for the SHC UI.
+ *
+ * This file imports Tailwind and acts as the global stylesheet for the React app. It is
+ * connected to all components through the app root and defines the shared visual language.
+ */
+
 @import "tailwindcss";

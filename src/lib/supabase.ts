@@ -1,3 +1,11 @@
+/**
+ * Client-side Supabase access helper.
+ *
+ * This file creates a browser-side Supabase client when environment variables are available.
+ * It is a secondary database connection path for the frontend and complements the server-side
+ * database access used by the API routes.
+ */
+
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 let supabaseClient: SupabaseClient | null = null;

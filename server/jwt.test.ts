@@ -1,3 +1,10 @@
+/**
+ * JWT verification tests for authentication contracts.
+ *
+ * This file checks that signed tokens carry the expected user identity and role metadata and
+ * that forged tokens are rejected. It validates the security assumptions used by server/auth.ts.
+ */
+
 import { describe, it, expect } from 'vitest';
 import jwt from 'jsonwebtoken';
 
