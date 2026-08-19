@@ -6,8 +6,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Session, Speaker, Attendee, AuditLogEntry, SystemSettings, User } from '../shared/types';
+import { Session, Speaker, Attendee, AuditLogEntry, SystemSettings, User, Conference } from '../shared/types';
 import { api } from '../services/api';
+import { DigitalBadge } from '../components/DigitalBadge';
 import { 
   ShieldAlert, 
   Plus, 
@@ -38,6 +39,7 @@ interface AdminViewProps {
   onRefreshData: () => void;
   onOpenAddSessionModal: () => void;
   conferenceId?: string;
+  conference?: Conference | null;
 }
 
 export const AdminView: React.FC<AdminViewProps> = ({
@@ -48,10 +50,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
   onRefreshData,
   onOpenAddSessionModal,
   conferenceId,
+  conference,
 }) => {
   const [activeAdminSubTab, setActiveAdminSubTab] = useState<'overview' | 'audit' | 'settings'>('overview');
   const [scanTicketId, setScanTicketId] = useState('');
   const [scanMessage, setScanMessage] = useState<{ text: string; success: boolean } | null>(null);
+  const [badgeAttendee, setBadgeAttendee] = useState<Attendee | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [settings, setSettings] = useState<SystemSettings>({
     autoApproveRegistration: true,
@@ -90,6 +94,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
   const totalRegistrations = attendees.length;
   const checkedInCount = attendees.filter((a) => a.isCheckedIn).length;
+
+  const getBadgeColor = (ticketTier: Attendee['ticketTier']) => {
+    if (ticketTier === 'vip') return 'bg-amber-500';
+    if (ticketTier === 'workshop') return 'bg-purple-600';
+    if (ticketTier === 'virtual') return 'bg-blue-600';
+    return 'bg-emerald-600';
+  };
 
   const handleTicketCheckIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -346,6 +357,60 @@ export const AdminView: React.FC<AdminViewProps> = ({
             )}
           </div>
 
+          {/* Attendee badge reprints */}
+          <div className="bg-white border border-gray-200 rounded-3xl p-6 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delegate Badge Reprints</h3>
+                <p className="text-xs text-slate-500">Print a scannable badge for any registered delegate.</p>
+              </div>
+              <Ticket className="w-5 h-5 text-blue-600" />
+            </div>
+
+            {attendees.length === 0 ? (
+              <p className="text-xs text-slate-500">No attendees are registered for this conference.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-gray-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-gray-200">
+                    <tr>
+                      <th className="p-3">Delegate</th>
+                      <th className="p-3">Ticket</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {attendees.map((attendee) => (
+                      <tr key={attendee.id} className="hover:bg-gray-50/60 transition">
+                        <td className="p-3">
+                          <div className="font-bold text-slate-900">{attendee.fullName}</div>
+                          <div className="text-[10px] text-slate-500">{attendee.company || attendee.email}</div>
+                        </td>
+                        <td className="p-3 font-mono text-slate-700">{attendee.ticketId}</td>
+                        <td className="p-3">
+                          <span className={attendee.isCheckedIn ? 'text-emerald-700 font-bold' : 'text-slate-500'}>
+                            {attendee.isCheckedIn ? 'Checked in' : 'Pending'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => setBadgeAttendee(attendee)}
+                            className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-2 rounded-xl text-[10px] inline-flex items-center gap-1.5 transition"
+                          >
+                            <Ticket className="w-3.5 h-3.5" />
+                            Print Badge
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
           {/* Sessions Management Table */}
           <div className="bg-white border border-gray-200 rounded-3xl p-6 space-y-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
@@ -555,6 +620,47 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {badgeAttendee && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-4 print:bg-white print:p-0">
+          <div className="bg-white rounded-3xl p-5 shadow-2xl space-y-4 print:p-0 print:shadow-none">
+            <div className="flex items-center justify-between gap-4 print:hidden">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Badge Preview</h3>
+                <p className="text-xs text-slate-500">{badgeAttendee.fullName}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBadgeAttendee(null)}
+                className="text-xs font-bold text-slate-500 hover:text-slate-900"
+              >
+                Close
+              </button>
+            </div>
+            <DigitalBadge
+              conference={conference}
+              fullName={badgeAttendee.fullName}
+              jobTitle={badgeAttendee.jobTitle}
+              company={badgeAttendee.company}
+              ticketId={badgeAttendee.ticketId}
+              qrCodeData={badgeAttendee.qrCodeData || `${badgeAttendee.ticketId}|${badgeAttendee.email}`}
+              passLabel={`${badgeAttendee.ticketTier} Pass`}
+              passColor={getBadgeColor(badgeAttendee.ticketTier)}
+              interests={badgeAttendee.interests}
+              compact
+            />
+            <div className="flex justify-end gap-2 print:hidden">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs"
+              >
+                Print Badge
+              </button>
+            </div>
           </div>
         </div>
       )}

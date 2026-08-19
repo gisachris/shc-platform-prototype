@@ -6,3 +6,32 @@
  */
 
 @import "tailwindcss";
+
+@media print {
+	body * {
+		visibility: hidden;
+	}
+
+	.badge-print-area,
+	.badge-print-area * {
+		visibility: visible;
+	}
+
+	.badge-print-area {
+		position: absolute;
+		inset: 0;
+		width: 86mm;
+		min-height: 54mm;
+		margin: 0;
+		padding: 6mm;
+		border: 1px solid #cbd5e1;
+		border-radius: 0;
+		box-shadow: none;
+		break-inside: avoid;
+	}
+
+	@page {
+		size: auto;
+		margin: 8mm;
+	}
+}

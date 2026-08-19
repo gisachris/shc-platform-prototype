@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { Attendee, Conference } from '../shared/types';
 import { api } from '../services/api';
+import { DigitalBadge } from '../components/DigitalBadge';
 import { 
   Ticket, 
   Check, 
@@ -490,64 +491,17 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
             <span className="text-[10px] text-blue-600 font-semibold">Live Badge</span>
           </h3>
 
-          <div className="bg-white border-2 border-gray-200 rounded-3xl p-6 shadow-md space-y-6 relative overflow-hidden">
-            {/* Lanyard Slot */}
-            <div className="w-16 h-3 bg-gray-200 rounded-full mx-auto border border-gray-300 shadow-inner"></div>
-
-            {/* Badge Tier Bar */}
-            <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  {selectedConf ? selectedConf.title : 'SHC Rwanda Conference'}
-                </div>
-                <div className="text-xs font-black text-slate-900 uppercase">
-                  {selectedPassOption.title}
-                </div>
-              </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-black uppercase text-white shadow-xs ${selectedPassOption.badgeColor}`}>
-                {selectedPassType.replace('_', ' ')}
-              </div>
-            </div>
-
-            {/* Attendee Info */}
-            <div className="space-y-1 text-center py-2">
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight">
-                {fullName.trim() || 'Your Name'}
-              </h4>
-              <p className="text-sm font-bold text-blue-600">
-                {jobTitle.trim() || 'Software Engineer'}
-              </p>
-              <p className="text-xs font-medium text-slate-500">
-                {company.trim() || 'Organization'}
-              </p>
-            </div>
-
-            {/* Interest Chips */}
-            <div className="flex flex-wrap justify-center gap-1.5 py-1">
-              {selectedInterests.length > 0 ? (
-                selectedInterests.slice(0, 3).map((tag) => (
-                  <span key={tag} className="text-[10px] font-semibold text-slate-700 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">
-                    {tag}
-                  </span>
-                ))
-              ) : (
-                <span className="text-[10px] text-slate-400 italic">Select topics above</span>
-              )}
-            </div>
-
-            {/* QR Code Canvas */}
-            <div className="bg-gray-50 p-4 rounded-2xl w-44 h-44 mx-auto flex flex-col items-center justify-center border-2 border-gray-200 shadow-xs space-y-1">
-              <QrCode className="w-28 h-28 text-slate-900" />
-              <div className="text-[9px] font-mono font-bold text-slate-800 tracking-tighter">
-                {createdAttendee ? createdAttendee.ticketId : 'SHC-PASS-PREVIEW'}
-              </div>
-            </div>
-
-            {/* Footer Pass details */}
-            <div className="text-center text-[10px] text-slate-500 pt-2 border-t border-gray-200">
-              {selectedConf?.venueName || 'Kigali Convention Centre'} • Digital Delegate Pass
-            </div>
-          </div>
+          <DigitalBadge
+            conference={selectedConf}
+            fullName={fullName.trim()}
+            jobTitle={jobTitle.trim()}
+            company={company.trim()}
+            ticketId={createdAttendee?.ticketId || ''}
+            qrCodeData={createdAttendee?.qrCodeData || ''}
+            passLabel={selectedPassOption.title}
+            passColor={selectedPassOption.badgeColor}
+            interests={selectedInterests}
+          />
         </div>
       </div>
     </div>

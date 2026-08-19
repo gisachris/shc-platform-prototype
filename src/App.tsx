@@ -324,6 +324,7 @@ export default function App() {
                 onRefreshData={refreshAllData}
                 onOpenAddSessionModal={() => setIsAddSessionOpen(true)}
                 conferenceId={currentConferenceId}
+                conference={activeConference}
               />
             )}
           </>
