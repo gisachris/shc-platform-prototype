@@ -24,6 +24,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "html-to-image": "^1.11.13",
     "jsonwebtoken": "^9.0.3",
     "livekit-client": "^2.20.2",
     "livekit-server-sdk": "^2.17.0",

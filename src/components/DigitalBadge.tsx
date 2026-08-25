@@ -1,8 +1,9 @@
 /**
  * Reusable conference badge renderer.
  *
- * This component presents the same delegate pass on screen and in print. It generates a real QR
- * image from the attendee payload so registration, reprinting, and check-in use one badge format.
+ * This component presents the same delegate pass on screen and as a downloadable image. It
+ * generates a real QR image from the attendee payload so registration, reprinting, and check-in
+ * use one badge format.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ import { QrCode } from 'lucide-react';
 import { Conference } from '../shared/types';
 
 interface DigitalBadgeProps {
+  badgeId?: string;
   conference?: Conference | null;
   fullName: string;
   jobTitle: string;
@@ -21,9 +23,11 @@ interface DigitalBadgeProps {
   passColor: string;
   interests?: string[];
   compact?: boolean;
+  onQrReady?: (ready: boolean) => void;
 }
 
 export const DigitalBadge: React.FC<DigitalBadgeProps> = ({
+  badgeId,
   conference,
   fullName,
   jobTitle,
@@ -34,12 +38,14 @@ export const DigitalBadge: React.FC<DigitalBadgeProps> = ({
   passColor,
   interests = [],
   compact = false,
+  onQrReady,
 }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   useEffect(() => {
     let isMounted = true;
     const payload = qrCodeData || ticketId || 'SHC-PASS-PREVIEW';
+    onQrReady?.(false);
 
     QRCode.toDataURL(payload, {
       width: compact ? 160 : 220,
@@ -47,19 +53,29 @@ export const DigitalBadge: React.FC<DigitalBadgeProps> = ({
       errorCorrectionLevel: 'M',
       color: { dark: '#0f172a', light: '#ffffff' },
     }).then((url) => {
-      if (isMounted) setQrCodeUrl(url);
+      if (isMounted) {
+        setQrCodeUrl(url);
+        onQrReady?.(true);
+      }
     }).catch(() => {
-      if (isMounted) setQrCodeUrl('');
+      if (isMounted) {
+        setQrCodeUrl('');
+        onQrReady?.(false);
+      }
     });
 
     return () => {
       isMounted = false;
     };
-  }, [compact, qrCodeData, ticketId]);
+  }, [compact, onQrReady, qrCodeData, ticketId]);
 
   return (
-    <div className={`badge-print-area bg-white border-2 border-gray-200 rounded-3xl p-6 shadow-md space-y-6 relative overflow-hidden ${compact ? 'max-w-sm' : ''}`}>
-      <div className="w-16 h-3 bg-gray-200 rounded-full mx-auto border border-gray-300 shadow-inner print:hidden"></div>
+    <div
+      id={badgeId}
+      data-qr-ready={qrCodeUrl ? 'true' : 'false'}
+      className={`bg-white border-2 border-gray-200 rounded-3xl p-6 shadow-md space-y-6 relative overflow-hidden ${compact ? 'max-w-sm' : ''}`}
+    >
+      <div className="w-16 h-3 bg-gray-200 rounded-full mx-auto border border-gray-300 shadow-inner"></div>
 
       <div className="flex items-center justify-between border-b border-gray-200 pb-4 gap-3">
         <div className="min-w-0">

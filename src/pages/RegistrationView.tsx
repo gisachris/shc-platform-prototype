@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { Attendee, Conference } from '../shared/types';
 import { api } from '../services/api';
 import { DigitalBadge } from '../components/DigitalBadge';
+import { downloadBadgeAsPng } from '../lib/badgeDownload';
 import { 
   Ticket, 
   Check, 
@@ -17,7 +18,6 @@ import {
   Mail, 
   Briefcase, 
   Building, 
-  Printer, 
   Download, 
   ShieldCheck, 
   Tag, 
@@ -102,6 +102,9 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdAttendee, setCreatedAttendee] = useState<Attendee | null>(null);
+  const [isBadgeQrReady, setIsBadgeQrReady] = useState(false);
+  const [isDownloadingBadge, setIsDownloadingBadge] = useState(false);
+  const [badgeDownloadError, setBadgeDownloadError] = useState('');
 
   useEffect(() => {
     api.getConferences().then(data => {
@@ -170,8 +173,17 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
     }
   };
 
-  const handlePrintBadge = () => {
-    window.print();
+  const handleDownloadBadge = async () => {
+    if (!createdAttendee) return;
+    setIsDownloadingBadge(true);
+    setBadgeDownloadError('');
+    try {
+      await downloadBadgeAsPng('registration-badge', createdAttendee.ticketId);
+    } catch (err) {
+      setBadgeDownloadError(err instanceof Error ? err.message : 'Badge download failed.');
+    } finally {
+      setIsDownloadingBadge(false);
+    }
   };
 
   return (
@@ -319,20 +331,25 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
 
               <div className="flex justify-center gap-3 pt-2">
                 <button
-                  onClick={handlePrintBadge}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition"
+                  type="button"
+                  onClick={handleDownloadBadge}
+                  disabled={!isBadgeQrReady || isDownloadingBadge}
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs transition"
                 >
-                  <Printer className="w-4 h-4" />
-                  <span>Print badge</span>
+                  <Download className="w-4 h-4" />
+                  <span>{isDownloadingBadge ? 'Downloading...' : 'Download badge'}</span>
                 </button>
-
                 <button
+                  type="button"
                   onClick={() => setCreatedAttendee(null)}
                   className="bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 font-semibold px-4 py-2 rounded-xl text-xs transition"
                 >
                   Register Another Delegate
                 </button>
               </div>
+              {badgeDownloadError && (
+                <p className="text-xs text-rose-700" role="alert">{badgeDownloadError}</p>
+              )}
             </div>
           ) : (
             <form onSubmit={handleRegisterSubmit} className="space-y-4">
@@ -492,6 +509,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
           </h3>
 
           <DigitalBadge
+            badgeId="registration-badge"
             conference={selectedConf}
             fullName={fullName.trim()}
             jobTitle={jobTitle.trim()}
@@ -501,6 +519,7 @@ export const RegistrationView: React.FC<RegistrationViewProps> = ({ onRegistrati
             passLabel={selectedPassOption.title}
             passColor={selectedPassOption.badgeColor}
             interests={selectedInterests}
+            onQrReady={setIsBadgeQrReady}
           />
         </div>
       </div>

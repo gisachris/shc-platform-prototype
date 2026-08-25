@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { Session, Speaker, Attendee, AuditLogEntry, SystemSettings, User, Conference } from '../shared/types';
 import { api } from '../services/api';
 import { DigitalBadge } from '../components/DigitalBadge';
+import { downloadBadgeAsPng } from '../lib/badgeDownload';
 import { 
   ShieldAlert, 
   Plus, 
@@ -56,6 +57,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [scanTicketId, setScanTicketId] = useState('');
   const [scanMessage, setScanMessage] = useState<{ text: string; success: boolean } | null>(null);
   const [badgeAttendee, setBadgeAttendee] = useState<Attendee | null>(null);
+  const [isBadgeQrReady, setIsBadgeQrReady] = useState(false);
+  const [isDownloadingBadge, setIsDownloadingBadge] = useState(false);
+  const [badgeDownloadError, setBadgeDownloadError] = useState('');
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [settings, setSettings] = useState<SystemSettings>({
     autoApproveRegistration: true,
@@ -100,6 +104,19 @@ export const AdminView: React.FC<AdminViewProps> = ({
     if (ticketTier === 'workshop') return 'bg-purple-600';
     if (ticketTier === 'virtual') return 'bg-blue-600';
     return 'bg-emerald-600';
+  };
+
+  const handleDownloadBadge = async () => {
+    if (!badgeAttendee) return;
+    setIsDownloadingBadge(true);
+    setBadgeDownloadError('');
+    try {
+      await downloadBadgeAsPng('admin-badge', badgeAttendee.ticketId);
+    } catch (err) {
+      setBadgeDownloadError(err instanceof Error ? err.message : 'Badge download failed.');
+    } finally {
+      setIsDownloadingBadge(false);
+    }
   };
 
   const handleTicketCheckIn = async (e: React.FormEvent) => {
@@ -400,7 +417,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                             className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-2 rounded-xl text-[10px] inline-flex items-center gap-1.5 transition"
                           >
                             <Ticket className="w-3.5 h-3.5" />
-                            Print Badge
+                            View Badge
                           </button>
                         </td>
                       </tr>
@@ -641,6 +658,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               </button>
             </div>
             <DigitalBadge
+              badgeId="admin-badge"
               conference={conference}
               fullName={badgeAttendee.fullName}
               jobTitle={badgeAttendee.jobTitle}
@@ -651,16 +669,21 @@ export const AdminView: React.FC<AdminViewProps> = ({
               passColor={getBadgeColor(badgeAttendee.ticketTier)}
               interests={badgeAttendee.interests}
               compact
+              onQrReady={setIsBadgeQrReady}
             />
             <div className="flex justify-end gap-2 print:hidden">
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs"
+                onClick={handleDownloadBadge}
+                disabled={!isBadgeQrReady || isDownloadingBadge}
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded-xl text-xs"
               >
-                Print Badge
+                {isDownloadingBadge ? 'Downloading...' : 'Download Badge'}
               </button>
             </div>
+            {badgeDownloadError && (
+              <p className="text-xs text-rose-700 print:hidden" role="alert">{badgeDownloadError}</p>
+            )}
           </div>
         </div>
       )}
